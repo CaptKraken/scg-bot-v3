@@ -10,10 +10,16 @@ datasource db {
   url      = env("CONNECTION_STRING")
 }
 
+enum Role{
+  USER
+  ADMIN
+}
+
 model Person {
   id              Int        @id
   name            String     @db.VarChar(255)
-  readerInfo     Reader?
+  role            Role
+  readerInfo      Reader?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   @@map("people")
