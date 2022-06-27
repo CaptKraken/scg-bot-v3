@@ -13,6 +13,25 @@ export const findAllUser = async (withReaderProfile: boolean = false) => {
   }
 };
 
+export const findOneUser = async (
+  id: number,
+  withReaderProfile: boolean = false
+) => {
+  try {
+    const user = dbClient.person.findUnique({
+      where: { id },
+      include: {
+        readerInfo: withReaderProfile,
+      },
+    });
+
+    if (!user) throw new Error(`User ${id} not found.`);
+    return user;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const createUser = async (
   id: number,
   name: string,
@@ -41,6 +60,16 @@ export const createUser = async (
       throw new Error("Failed to create user.");
     }
     return user;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteUser = async (id: number) => {
+  try {
+    await dbClient.person.delete({
+      where: { id },
+    });
   } catch (error) {
     throw error;
   }
