@@ -28,7 +28,7 @@ model Person {
 model Reader {
   id              Int        @id @default(autoincrement())
   readerName      String     @db.VarChar(255)
-  person          Person     @relation(fields: [accountId], references: [id])
+  person          Person     @relation(fields: [accountId], references: [id], onDelete: Cascade)
   accountId       Int 
   lastMessageId   Int        @default(0)
   readCount       Int        @default(0)
@@ -50,7 +50,7 @@ model Group {
 model DayCount {
   id              Int        @id @default(autoincrement())
   groupId         Int
-  group           Group      @relation(fields: [groupId], references: [id])
+  group           Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
   dayCount        Int        @default(0)
   schedule        String     @db.VarChar(255) @default("0 0 * * *") 
   message         String     @db.VarChar(255) @default("ថ្ងៃទី {day_count}")
