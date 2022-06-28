@@ -67,3 +67,11 @@ model Folder {
   updatedAt       DateTime   @updatedAt
   @@map("folders")
 }
+
+model Quote {
+  id              Int        @id @default(autoincrement())
+  text            String     @unique
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  @@map("quotes")
+}
