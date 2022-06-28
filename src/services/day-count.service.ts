@@ -1,3 +1,4 @@
+import cron from "node-cron";
 import { dbClient } from "../libs";
 
 export const findAllDayCounts = async () => {
@@ -38,6 +39,9 @@ export const createDayCount = async ({
   schedule = "0 0 * * *",
   message = "ថ្ងៃទី {day_count}",
 }: CreateDayCounter) => {
+  if (schedule && !cron.validate(schedule)) {
+    throw new Error("Invalid schedule");
+  }
   return await dbClient.dayCount.create({
     data: {
       groupId,
@@ -66,6 +70,9 @@ export const updateDayCount = async ({
   schedule,
   message,
 }: UpdateDayCounter) => {
+  if (schedule && !cron.validate(schedule)) {
+    throw new Error("Invalid schedule");
+  }
   const oldData = await findOneDayCount(id);
 
   return await dbClient.dayCount.update({
@@ -81,6 +88,25 @@ export const updateDayCount = async ({
     include: {
       group: true,
     },
+  });
+};
+
+// export const increaseDayCount = async (ids: { id: number }[]) => {
+//   if (ids.length <= 0) return;
+//   await dbClient.dayCount.updateMany({
+//     where: {
+//       OR: [...ids],
+//     },
+//     data: {
+//       dayCount: { increment: 1 },
+//     },
+//   });
+// };
+
+export const increaseDayCount = async (id: number) => {
+  return await dbClient.dayCount.update({
+    where: { id },
+    data: { dayCount: { increment: 1 } },
   });
 };
 
