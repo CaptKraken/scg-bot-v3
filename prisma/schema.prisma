@@ -20,8 +20,8 @@ model Person {
   name            String     @db.VarChar(255)
   role            Role
   readerInfo      Reader?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  createdAt       DateTime?   @default(now())
+  updatedAt       DateTime?   @updatedAt
   @@map("people")
 }
 
@@ -32,8 +32,8 @@ model Reader {
   accountId       Int 
   lastMessageId   Int        @default(0)
   readCount       Int        @default(0)
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  createdAt       DateTime?   @default(now())
+  updatedAt       DateTime?   @updatedAt
   @@map("readers")
 }
 
@@ -42,8 +42,8 @@ model Group {
   name            String     @db.VarChar(255)
   dayCount        DayCount[]
   folders         Folder[]
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  createdAt       DateTime?   @default(now())
+  updatedAt       DateTime?   @updatedAt
   @@map("groups")
 }
 
@@ -54,8 +54,8 @@ model DayCount {
   dayCount        Int        @default(0)
   schedule        String     @db.VarChar(255) @default("0 0 * * *") 
   message         String     @db.VarChar(255) @default("ថ្ងៃទី {day_count}")
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  createdAt       DateTime?   @default(now())
+  updatedAt       DateTime?   @updatedAt
   @@map("day_counts")
 }
 
@@ -63,15 +63,15 @@ model Folder {
   id              Int        @id @default(autoincrement())
   name            String     @db.VarChar(255) @unique
   groups          Group[]
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  createdAt       DateTime?   @default(now())
+  updatedAt       DateTime?   @updatedAt
   @@map("folders")
 }
 
 model Quote {
   id              Int        @id @default(autoincrement())
   text            String     @unique
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  createdAt       DateTime?   @default(now())
+  updatedAt       DateTime?   @updatedAt
   @@map("quotes")
 }
