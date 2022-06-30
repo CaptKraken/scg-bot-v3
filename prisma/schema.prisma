@@ -27,13 +27,13 @@ model Person {
 
 model Reader {
   id              Int        @id @default(autoincrement())
-  readerName      String     @db.VarChar(255)
+  readerName      String     @db.VarChar(255) @unique
   person          Person     @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  accountId       Int 
+  accountId       Int        @unique
   lastMessageId   Int        @default(0)
   readCount       Int        @default(0)
-  createdAt       DateTime?   @default(now())
-  updatedAt       DateTime?   @updatedAt
+  createdAt       DateTime?  @default(now())
+  updatedAt       DateTime?  @updatedAt
   @@map("readers")
 }
 
