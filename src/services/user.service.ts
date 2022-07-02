@@ -41,7 +41,6 @@ export const createUser = async (
     update: {
       id,
       name,
-      role: "USER",
     },
     include: {
       readerInfo: withReaderProfile,
