@@ -35,6 +35,16 @@ export const updateQuote = async (id: number, text: string) => {
   });
 };
 
-export const deleteQuote = async (id: number) => {
-  await dbClient.quote.delete({ where: { id } });
+export const deleteQuote = async ({
+  id,
+  text,
+}: {
+  id?: number;
+  text?: string;
+}) => {
+  if (!id && !text) {
+    throw new Error("Quote id or text required.");
+  }
+  const payload = id ? { id } : { text };
+  await dbClient.quote.delete({ where: payload });
 };

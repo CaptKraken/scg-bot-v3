@@ -22,7 +22,7 @@ export const findOneDayCount = async (id: number) => {
     },
   });
 
-  if (!dayCount) throw new Error(`Day count ${id} not found.`);
+  // if (!dayCount) throw new Error(`Day count ${id} not found.`);
   return dayCount;
 };
 
@@ -74,6 +74,10 @@ export const updateDayCount = async ({
     throw new Error("Invalid schedule");
   }
   const oldData = await findOneDayCount(id);
+
+  if (!oldData) {
+    throw new Error(`Day count data id ${id} was found.`);
+  }
 
   return await dbClient.dayCount.update({
     where: {

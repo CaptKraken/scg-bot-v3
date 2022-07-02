@@ -1,36 +1,106 @@
 import { dbClient } from "../libs";
 
 export const findAllFolders = async () => {
-  return await dbClient.folder.findMany();
+  return await dbClient.folder.findMany({
+    include: {
+      groups: true,
+    },
+  });
 };
 
-export const findOneFolder = async (id: number) => {
+export const findOneFolder = async ({
+  id,
+  name,
+}: {
+  id?: number;
+  name?: string;
+}) => {
+  if (!id && !name) {
+    throw new Error("folder id or name required.");
+  }
+
+  const payload = id ? { id } : { name };
+
   const folder = await dbClient.folder.findUnique({
-    where: {
-      id,
+    where: payload,
+    include: {
+      groups: true,
     },
   });
 
-  if (!folder) throw new Error(`folder ${id} not found.`);
   return folder;
 };
 
-export const createFolder = async (id: number, name: string) => {
+export const createFolder = async (name: string) => {
+  return await dbClient.folder.create({
+    data: { name },
+  });
+};
+
+export const renameFolder = async (name: string, newName: string) => {
+  if (!name || !newName) {
+    throw new Error("Old and new name required.");
+  }
   return await dbClient.folder.upsert({
     where: {
-      id,
+      name,
     },
     create: {
-      id,
-      name,
+      name: newName,
     },
     update: {
-      id,
-      name,
+      name: newName,
     },
   });
 };
 
-export const deleteFolder = async (id: number) => {
-  await dbClient.folder.delete({ where: { id } });
+export const deleteFolder = async ({
+  id,
+  name,
+}: {
+  id?: number;
+  name?: string;
+}) => {
+  if (!id && !name) {
+    throw new Error("folder id or name required.");
+  }
+
+  const payload = id ? { id } : { name };
+  await dbClient.folder.delete({ where: payload });
+};
+
+export const addGroupToFolder = async (
+  folderName: string,
+  groupId: number,
+  groupName: string
+) => {
+  return await dbClient.folder.update({
+    where: { name: folderName },
+    data: {
+      groups: {
+        connectOrCreate: {
+          where: {
+            id: groupId,
+          },
+          create: {
+            id: groupId,
+            name: groupName,
+          },
+        },
+      },
+    },
+  });
+};
+export const removeGroupFromFolder = async (
+  folderName: string,
+  groupId: number
+) => {
+  return await dbClient.folder.update({
+    where: { name: folderName },
+    data: {
+      groups: {
+        disconnect: [{ id: groupId }],
+      },
+    },
+  });
 };

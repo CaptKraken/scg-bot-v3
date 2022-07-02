@@ -1,35 +1,45 @@
 import cron from "node-cron";
 import { dbClient } from "../libs";
+import { errorHandler, sendMessage } from "../libs/utils";
 import { findAllDayCounts, increaseDayCount } from "./day-count.service";
-import { sendMessage } from "./messaging.service";
+import { sendReport } from "./reader.service";
 
 export const createCronJobs = async () => {
   const all = await dbClient.dayCount
     .findMany({
       select: {
         id: true,
+        groupId: true,
         schedule: true,
       },
     })
     .then((dayCounts) => {
-      return dayCounts.filter((dayCount) => cron.validate(dayCount.schedule));
+      return dayCounts.filter((dayCount) =>
+        cron.validate(`${dayCount?.schedule}`)
+      );
     });
 
   all.forEach(async (dc) => {
     cron.schedule(
-      dc.schedule,
+      `${dc.schedule}`,
       async () => {
         try {
           const data = await increaseDayCount(dc.id);
+
+          if (dc.id === Number(process.env.READING_GROUP_DAY_COUNT_ID)) {
+            return sendReport();
+          }
+
           const uncleanedMessage = data.message;
           const message = `${uncleanedMessage?.replaceAll(
             "{day_count}",
             `${data.dayCount}`
           )}`;
-          console.log(data);
 
-          // sendMessage(data.groupId, message + data.id);
-        } catch (error) {}
+          sendMessage(data.groupId, message);
+        } catch (error) {
+          errorHandler(dc.groupId, error);
+        }
       },
       {
         scheduled: false,
@@ -37,16 +47,16 @@ export const createCronJobs = async () => {
       }
     );
   });
-  console.log(`[INFO]: ${cron.getTasks().length} jobs created.`);
+  console.log(`[INFO]: ${cron.getTasks().size} jobs created.`);
 };
 export const startCronJobs = () => {
   cron.getTasks().forEach((job) => job.start());
-  console.log(`[INFO]: ${cron.getTasks().length} jobs started.`);
+  console.log(`[INFO]: ${cron.getTasks().size} jobs started.`);
 };
 
 export const stopCronJobs = () => {
   cron.getTasks().forEach((job) => job.stop());
-  console.log(`[INFO]: ${cron.getTasks().length} jobs stopped.`);
+  console.log(`[INFO]: ${cron.getTasks().size} jobs stopped.`);
   emptyNodeCronStorage();
 };
 
@@ -64,11 +74,11 @@ export const restartCronJobs = async () => {
 /**
  * specifically for node-cron.js!
  *
- * sets cron.getTasks() = []
+ * reset cron.getTasks()
  *
  */
 export const emptyNodeCronStorage = () => {
   // looked into the source code for this.
   // @ts-ignore
-  global.scheduledTasks = [];
+  global.scheduledTasks = new Map();
 };
