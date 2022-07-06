@@ -37,7 +37,7 @@ export const createFolder = async (name: string) => {
   });
 };
 
-export const renameFolder = async (name: string, newName: string) => {
+export const updateFolder = async (name: string, newName: string) => {
   if (!name || !newName) {
     throw new Error("Old and new name required.");
   }

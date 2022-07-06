@@ -9,8 +9,10 @@ import { debug } from "util";
 import { COMMANDS } from "./libs/constants";
 import {
   cleanMessage,
+  csvToTable,
   errorHandler,
   isSenderAdmin,
+  removeCommand,
   sendDisappearingMessage,
   sendMessage,
 } from "./libs/utils";
@@ -28,16 +30,21 @@ import {
 import { createDayCount, increaseDayCount } from "./services/day-count.service";
 import { createGroup } from "./services/group.service";
 import { sendReport } from "./services/reader.service";
-import { addQuoteCommand, removeQuoteCommand } from "./commands/quote.command";
+import {
+  addQuoteCommand,
+  removeQuoteCommand,
+  viewQuoteCommand,
+} from "./commands/quote.command";
 import {
   formatMiddleware,
   isAdminMiddleware,
 } from "./middlewares/bot.middleware";
 import {
+  listDayCountCommand,
   removeGroupCommand,
   setGroupCommand,
+  updateGroupCommand,
 } from "./commands/day-count.command";
-import { createFolder, renameFolder } from "./services/folder.service";
 import {
   addGroupBroadcastCommand,
   createFolderCommand,
@@ -47,15 +54,16 @@ import {
   renameFolderCommand,
 } from "./commands/broadcast.command";
 import {
-  addGroupBroadcastAction,
+  GROUP_NEW_ACTION,
   cancelAction,
-  deleteFolderAction,
+  FOLDER_DELETE_ACTION,
   emitBroadcastAction,
-  goBackBroadcastAction,
-  removeGroupBroadcastAction,
-  showRemoveGroupBroadcastAction,
+  BROADCAST_BACK_ACTION,
+  GROUP_DELETE_ACTION,
+  GROUP_LIST_DELETE_ACTION,
 } from "./actions/broadcast.action";
 import { sendCommands } from "./commands/help.command";
+import { dbClient } from "./libs";
 dotenv.config();
 
 const { BOT_TOKEN, SERVER_URL } = process.env;
@@ -65,6 +73,8 @@ export interface MyContext extends Context {
   chatId: number;
   isGroup: boolean;
   isAdmin: boolean;
+  cleanedMessage: string;
+  cleanedCallback: string;
 }
 
 const bot = new Telegraf<MyContext>(BOT_TOKEN as string);
@@ -73,7 +83,6 @@ bot.use(formatMiddleware);
 bot.start(async (ctx) => {
   const username = ctx.from.first_name;
   await ctx.reply(`what's up, ${username}.`);
-  console.log(ctx.isGroup, ctx.chatId);
 });
 bot.help(sendCommands);
 
@@ -81,38 +90,37 @@ bot.hears(/\#\d{1,}/g, (ctx) => updateReadCountCommand(ctx));
 bot.on("edited_message", (ctx) => updateReadCountCommand(ctx, false));
 
 bot.use(isAdminMiddleware);
-bot.command(COMMANDS.removeReader, removeReaderCommand);
-bot.command(COMMANDS.readReport, readReportCommand);
+bot.command(COMMANDS.READER_DELETE, removeReaderCommand);
+bot.command(COMMANDS.READER_LIST, readReportCommand);
 
-bot.command(COMMANDS.setGroup, setGroupCommand);
-bot.command(COMMANDS.removeGroup, removeGroupCommand);
+bot.command(COMMANDS.DC_NEW, setGroupCommand);
+bot.command(COMMANDS.DC_EDIT, updateGroupCommand);
+bot.command(COMMANDS.DC_DELETE, removeGroupCommand);
+bot.command(COMMANDS.DC_LIST, listDayCountCommand);
 
-bot.command(COMMANDS.admins, sendAdminListCommand);
-bot.command(COMMANDS.addGlobalAdmin, addGlobalAdminCommand);
-bot.command(COMMANDS.removeGlobalAdmin, removeGlobalAdminCommand);
+bot.command(COMMANDS.ADMIN_LIST, sendAdminListCommand);
+bot.command(COMMANDS.ADMIN_NEW, addGlobalAdminCommand);
+bot.command(COMMANDS.ADMIN_DELETE, removeGlobalAdminCommand);
 
 //#region Quote
-bot.command(COMMANDS.addQuote, addQuoteCommand);
-bot.command(COMMANDS.removeQuote, removeQuoteCommand);
+bot.command(COMMANDS.QUOTE_NEW, addQuoteCommand);
+bot.command(COMMANDS.QUOTE_LIST, viewQuoteCommand);
+bot.command(COMMANDS.QUOTE_DELETE, removeQuoteCommand);
 //#endregion
 
-bot.command(COMMANDS.createFolder, createFolderCommand);
-bot.command(COMMANDS.renameFolder, renameFolderCommand);
-bot.command(COMMANDS.deleteFolder, deleteFolderCommand);
-bot.action(/\bdelete-folder-action\b/g, deleteFolderAction);
-bot.command(COMMANDS.addGroupBroadcast, addGroupBroadcastCommand);
-bot.action(/\badd-group-broadcast-action\b/g, addGroupBroadcastAction);
-bot.command(COMMANDS.removeGroupBroadcast, removeGroupBroadcastCommand);
-bot.action(
-  /\bshow-remove-group-broadcast-action\b/g,
-  showRemoveGroupBroadcastAction
-);
-bot.action(/\bremove-group-broadcast-action\b/g, removeGroupBroadcastAction);
-bot.action(/\bgo-back-broadcast-action\b/g, goBackBroadcastAction);
+bot.command(COMMANDS.FOLDER_NEW, createFolderCommand);
+bot.command(COMMANDS.FOLDER_EDIT, renameFolderCommand);
+bot.command(COMMANDS.FOLDER_DELETE, deleteFolderCommand);
+bot.action(/\bdelete-folder-action\b/g, FOLDER_DELETE_ACTION);
+bot.command(COMMANDS.GROUP_NEW, addGroupBroadcastCommand);
+bot.action(/\badd-group-broadcast-action\b/g, GROUP_NEW_ACTION);
+bot.command(COMMANDS.GROUP_DELETE, removeGroupBroadcastCommand);
+bot.action(/\bshow-remove-group-broadcast-action\b/g, GROUP_LIST_DELETE_ACTION);
+bot.action(/\bremove-group-broadcast-action\b/g, GROUP_DELETE_ACTION);
+bot.action(/\bgo-back-broadcast-action\b/g, BROADCAST_BACK_ACTION);
 bot.action(/\bcancel\b/g, cancelAction);
-bot.command(COMMANDS.emit, emitBroadcastCommand);
+bot.command(COMMANDS.EMIT, emitBroadcastCommand);
 bot.action(/\bemit\b/g, emitBroadcastAction);
-
 bot.telegram.setWebhook(`${SERVER_URL}/bot${BOT_TOKEN}`);
 const app = express();
 app.use(bodyParser.json());

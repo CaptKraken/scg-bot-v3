@@ -12,9 +12,10 @@ export const isSenderAdmin = async (userId: number) => {
 import axios from "axios";
 import dotenv from "dotenv";
 import { COMMANDS } from "./constants";
+import { Prisma } from "@prisma/client";
 dotenv.config();
 
-const { BOT_TOKEN } = process.env;
+const { BOT_TOKEN, BOT_USERNAME } = process.env;
 
 const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
@@ -154,25 +155,45 @@ export const sendMessage = async (
   }
 };
 
-export const errorHandler = (group_id: number, e: unknown): void => {
-  if (typeof e === "string") {
-    sendDisappearingMessage(group_id, `[ERROR]: ${e}`);
-    return;
-  } else if (e instanceof Error) {
-    const message = e.message;
-    if (message.includes("E11000")) {
-      sendDisappearingMessage(group_id, `[ERROR]: Data duplication error.`);
-      return;
-    }
-    if (message.includes(`INVALID SCHEDULE`)) {
-      sendDisappearingMessage(
+export const errorHandler = async (group_id: number, e: unknown) => {
+  if (e instanceof Prisma.PrismaClientKnownRequestError) {
+    if (e.code === "P2002") {
+      return sendDisappearingErrorMessage(
         group_id,
-        `[ERROR]: Invalid schedule expression received.`
+        `${
+          e.meta?.target
+            ? //@ts-ignore
+              `Duplication Error: ${e.meta?.target[0]} `
+            : "Duplication Error."
+        }`
       );
-      return;
     }
-    sendDisappearingMessage(group_id, `[Error]: ${message}`);
+    if (e.code === "P2025") {
+      return sendDisappearingErrorMessage(
+        group_id,
+        `${e.meta?.cause ?? "Record not found."}`
+      );
+    }
   }
+
+  if (e instanceof Error) {
+    const message = e.message;
+
+    if (message.includes(`INVALID SCHEDULE`)) {
+      return sendDisappearingErrorMessage(
+        group_id,
+        `Invalid schedule expression received.`
+      );
+    }
+    sendDisappearingErrorMessage(group_id, `${message}`);
+  }
+};
+
+export const sendDisappearingErrorMessage = async (
+  group_id: number,
+  message: string
+) => {
+  await sendDisappearingMessage(group_id, `[Error]: ${message}`);
 };
 
 export const deleteMessage = async (chat_id: number, message_id: number) => {
@@ -197,7 +218,10 @@ export const sendDisappearingMessage = async (
 ) => {
   const res = await sendMessage(
     group_id,
-    `${message}\nThis message will be automatically deleted in ${durationInSeconds} seconds.`
+    `${cleanMessage(
+      message
+    )}\n*_This message will be automatically deleted in ${durationInSeconds} seconds_*`,
+    "MarkdownV2"
   );
 
   setTimeout(async () => {
@@ -212,12 +236,13 @@ export const cancelKey = [
   },
 ];
 export const goBackBroadcastKey = [
-  { text: "Go Back", callback_data: COMMANDS.goBackBroadcastAction },
+  { text: "Go Back", callback_data: COMMANDS.BROADCAST_BACK_ACTION },
 ];
 
 export const getSetGroupResult = (message: string) => {
   const flags = message.split(" -");
   type Result = {
+    id?: number;
     message?: string;
     dayCount?: number;
     schedule?: string;
@@ -246,6 +271,12 @@ export const getSetGroupResult = (message: string) => {
           result.dayCount = parseInt(number);
         }
       }
+      if (flag.startsWith("id ")) {
+        const number = flag.replace("id ", "");
+        if (number) {
+          result.id = parseInt(number);
+        }
+      }
       if (flag.startsWith("s ")) {
         const schedule = flag
           .replace("s ", "")
@@ -255,6 +286,70 @@ export const getSetGroupResult = (message: string) => {
         result.schedule = schedule;
       }
     });
+
+  return result;
+};
+
+export const csvToTable = (
+  data: string,
+  delimiter: string = ",",
+  hasHeaders: boolean = false
+) => {
+  const rows: string[][] = data.split("\n").map((row) => row.split(delimiter));
+  let numOfCol = 0;
+  const spaceForCol: number[] = [];
+  rows.map((cells, i) => {
+    if (numOfCol < cells.length) {
+      numOfCol = cells.length;
+    }
+    cells.map((cell, j) => {
+      if (i === 0 || Number(spaceForCol[j]) < cell.length) {
+        spaceForCol[j] = cell.length;
+      }
+    });
+  });
+
+  const table = rows.map((cells) => {
+    return cells
+      .map((cell, i) => {
+        return " " + cell.padEnd(spaceForCol[i]) + " ";
+      })
+      .join("|");
+  });
+
+  if (hasHeaders) {
+    table.splice(
+      1,
+      0,
+      Array(numOfCol)
+        .fill("-")
+        .map((_, i) => "".padStart(spaceForCol[i] + 2, "-")) // 2 for space (table loop)
+        .join("|")
+    );
+  }
+
+  return table.join("\n");
+};
+
+export const removeCommand = (message: string) => {
+  const trimmedMessage = message.trim();
+  let result = trimmedMessage;
+
+  const commands = Object.values(COMMANDS);
+  commands.map((command) => {
+    const isMatchCommand = trimmedMessage.startsWith("/" + command);
+    const isMatchAction =
+      trimmedMessage.startsWith(command) && trimmedMessage.includes("-action");
+
+    if (isMatchCommand) {
+      result = trimmedMessage
+        .replaceAll(`/${command}@${BOT_USERNAME}`, "")
+        .replaceAll("/" + command, "");
+    }
+    if (isMatchAction) {
+      result = message.replaceAll(command, "");
+    }
+  });
 
   return result;
 };

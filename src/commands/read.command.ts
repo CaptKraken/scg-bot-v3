@@ -15,6 +15,9 @@ import {
 } from "../services/reader.service";
 import { COMMANDS } from "../libs/constants";
 import { MyContext } from "../index";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import e from "express";
+import { createUser } from "../services/user.service";
 
 export const updateReadCountCommand = async (
   ctx: MyContext,
@@ -43,12 +46,18 @@ export const updateReadCountCommand = async (
       .split(" ")
       .filter((part: string) => part);
 
+    const needsDummy = message.includes("-dd");
     const count = convertKhmerToArabicNumerals(parts[0].replace("#", ""));
     const user = parts[1];
     const hasEnoughData = isNumber(count.toString()) && user && messageId;
 
     if (hasEnoughData) {
-      await saveReadCount(ctx.senderId, user, count, messageId);
+      if (needsDummy) {
+        const dummyId = Math.floor(Math.random() * 1000);
+        const dummyUser = await createUser(dummyId, "Dummy User");
+        return await saveReadCount(dummyUser.id, user, count, messageId);
+      }
+      return await saveReadCount(ctx.senderId, user, count, messageId);
     }
   } catch (error) {
     errorHandler(ctx.chatId, error);
@@ -57,13 +66,11 @@ export const updateReadCountCommand = async (
 
 export const removeReaderCommand = async (ctx: MyContext) => {
   try {
-    // @ts-ignore
-    const message = ctx.message.text;
-    const readerName = message.replace(`/${COMMANDS.removeReader}`, "").trim();
+    const readerName = ctx.cleanedMessage.trim();
 
     if (!readerName) {
       throw new Error(
-        `Reader's name not found.\ni.e. /${COMMANDS.removeReader} សុង`
+        `Reader's name not found.\nExample: /${COMMANDS.READER_DELETE} សុង`
       );
     }
 

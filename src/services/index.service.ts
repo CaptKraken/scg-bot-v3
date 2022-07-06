@@ -1,7 +1,7 @@
 export {
   findAllAdmins,
-  addGlobalAdmin,
-  removeGlobalAdmin,
+  ADMIN_NEW,
+  ADMIN_DELETE,
   getAdminList,
 } from "./admin.service";
 export {

@@ -34,10 +34,7 @@ export const sendReport = async () => {
     );
 
     if (!daycount) {
-      return sendMessage(
-        Number(process.env.READING_GROUP_ID),
-        "Day count infomation not available."
-      );
+      throw new Error("Day count infomation not available.");
     }
 
     const readers = await findReaders();
@@ -51,7 +48,7 @@ export const sendReport = async () => {
 
     await sendMessage(Number(process.env.READING_GROUP_ID), report);
   } catch (err) {
-    throw new Error(`function: "sendReport"\nerror: ${err}`);
+    throw err;
   }
 };
 
@@ -67,7 +64,7 @@ export const saveReadCount = async (
 
   const readerProfile = await dbClient.reader.upsert({
     where: {
-      accountId,
+      readerName,
     },
     create: {
       accountId,
@@ -76,9 +73,7 @@ export const saveReadCount = async (
       lastMessageId,
     },
     update: {
-      accountId,
       readCount: isNewMessage ? readCount : user.readerInfo?.readCount,
-      readerName,
       lastMessageId: isNewMessage
         ? lastMessageId
         : user.readerInfo?.lastMessageId,
@@ -98,6 +93,7 @@ export const deleteReader = async ({
   accountId?: number;
   readerName?: string;
 }) => {
+  console.log(accountId, readerName);
   if (!accountId && !readerName) {
     throw new Error("account id or reader name required.");
   }

@@ -1,75 +1,102 @@
 export const COMMANDS = {
-  setGroup: "setGroup",
-  removeGroup: "removeGroup",
-  setCount: "setCount",
-  setSchedule: "setSchedule",
-  setAdmin: "setAdmin",
-  removeAdmin: "removeAdmin",
-  addAdminAnnounce: "addAdminAnnounce",
-  addGroupAnnounce: "addGroupAnnounce",
-  removeAdminAnnounce: "removeAdminAnnounce",
-  removeGroupAnnounce: "removeGroupAnnounce",
-  emit: "emit",
-  removeAdminAction: "remove-admin-action",
-  removeGroupAction: "remove-group-action",
-  removeWeight: "removeWeight",
-  createFolder: "createFolder",
-  renameFolder: "renameFolder",
-  deleteFolder: "deleteFolder",
-  renameFolderAction: "rename-folder-action",
-  deleteFolderAction: "delete-folder-action",
-  addGroupBroadcast: "addGroupBroadcast",
-  addGroupBroadcastAction: "add-group-broadcast-action",
-  removeGroupBroadcast: "removeGroupBroadcast",
-  removeGroupBroadcastAction: "remove-group-broadcast-action",
-  showRemoveGroupBroadcastAction: "show-remove-group-broadcast-action",
-  goBackBroadcastAction: "go-back-broadcast-action",
-  admins: "admins",
-  addGlobalAdmin: "addGlobalAdmin",
-  removeGlobalAdmin: "removeGlobalAdmin",
-  removeReader: "removeReader",
-  readReport: "readReport",
-  addQuote: "addQuote",
-  removeQuote: "removeQuote",
+  // DAY COUNT //
+  /** "newdc" */
+  DC_NEW: "newdc",
+  /** "deletedc" */
+  DC_DELETE: "deletedc",
+  /** "editdc" */
+  DC_EDIT: "editdc",
+  /** "listdc" */
+  DC_LIST: "listdc",
+
+  // ADMINS //
+  /**listadmins */
+  ADMIN_LIST: "listadmins",
+  /** "newadmin" */
+  ADMIN_NEW: "newadmin",
+  /** "deleteadmin" */
+  ADMIN_DELETE: "deleteadmin",
+
+  // READERS //
+  /** "deletereader" */
+  READER_DELETE: "deletereader",
+  /** "listreaders" */
+  READER_LIST: "listreaders",
+
+  // QUOTES //
+  /** "newquote" */
+  QUOTE_NEW: "newquote",
+  /** "deletequote" */
+  QUOTE_DELETE: "deletequote",
+  /** "listquotes" */
+  QUOTE_LIST: "listquotes",
+
+  // BROADCAST //
+  /** "emit" */
+  EMIT: "emit",
+  /** "emit" */
+  EMIT_ACTION: "emit-action",
+  /** "newfolder" */
+  FOLDER_NEW: "newfolder",
+  /** "editfolder" */
+  FOLDER_EDIT: "editfolder",
+  /** "deletefolder" */
+  FOLDER_DELETE: "deletefolder",
+  /** "delete-folder-action" */
+  FOLDER_DELETE_ACTION: "delete-folder-action",
+  /** "newgroup" */
+  GROUP_NEW: "newgroup",
+  /** "add-group-broadcast-action" */
+  GROUP_NEW_ACTION: "add-group-broadcast-action",
+  /** "deletegroup" */
+  GROUP_DELETE: "deletegroup",
+  /** "remove-group-broadcast-action" */
+  GROUP_DELETE_ACTION: "remove-group-broadcast-action",
+  /** "show-remove-group-broadcast-action" */
+  GROUP_LIST_DELETE_ACTION: "show-remove-group-broadcast-action",
+  /** "go-back-broadcast-action" */
+  BROADCAST_BACK_ACTION: "go-back-broadcast-action",
 };
 const dayCountCommands = {
   name: "Day Count",
   commands: [
-    `/${COMMANDS.setGroup} -d 1 -s "0 5 * * *" -m "whatever {day_count} you want." — set/update day count group.`,
-    `/${COMMANDS.removeGroup} — remove day count.`,
+    `/${COMMANDS.DC_NEW} -d 1 -s "0 5 * * *" -m "whatever {day_count} you want." — create new day count record for the group.`,
+    `/${COMMANDS.DC_EDIT} -id 1 -d 1 -s "0 5 * * *" -m "whatever {day_count} you want." — update day count with the given id.`,
+    `/${COMMANDS.DC_DELETE} — remove day count.`,
+    `/${COMMANDS.DC_LIST} - list all day count records of a group.`,
   ],
 };
 const broadcastCommands = {
   name: "Broadcast",
   commands: [
-    `/${COMMANDS.createFolder} folder name — create a new folder.`,
-    `/${COMMANDS.renameFolder} -o old name -n new name — rename a folder.`,
-    `/${COMMANDS.deleteFolder} — delete a folder and its content.`,
-    `/${COMMANDS.addGroupBroadcast} — add current group to a folder.`,
-    `/${COMMANDS.removeGroupBroadcast} — remove current group from a folder.`,
-    `/${COMMANDS.emit} message here — mass send message to a folder group.`,
+    `/${COMMANDS.FOLDER_NEW} folder name — create a new folder.`,
+    `/${COMMANDS.FOLDER_EDIT} -o old name -n new name — rename a folder.`,
+    `/${COMMANDS.FOLDER_DELETE} — delete a folder and its content.`,
+    `/${COMMANDS.GROUP_NEW} — add current group to a folder.`,
+    `/${COMMANDS.GROUP_DELETE} — remove current group from a folder.`,
+    `/${COMMANDS.EMIT} message here — mass send message to a folder group.`,
   ],
 };
 const readingGroupCommands = {
   name: "Reading Group",
   commands: [
-    `/${COMMANDS.removeReader} reader name — remove reader from reading group.`,
-    `/${COMMANDS.readReport} — send report to the reading group.`,
+    `/${COMMANDS.READER_DELETE} reader name — remove reader from reading group.`,
+    `/${COMMANDS.READER_LIST} — send report to the reading group.`,
   ],
 };
 const adminCommands = {
   name: "Admins",
   commands: [
-    `/${COMMANDS.admins} — send admin list.`,
-    `/${COMMANDS.addGlobalAdmin} {reply} — add user as global admin.`,
-    `/${COMMANDS.removeGlobalAdmin} {reply} — remove user from admin database.`,
+    `/${COMMANDS.ADMIN_LIST} — send admin list.`,
+    `/${COMMANDS.ADMIN_NEW} {reply} — add user as global admin.`,
+    `/${COMMANDS.ADMIN_DELETE} {reply} — remove user from admin database.`,
   ],
 };
 const quoteCommands = {
   name: "Quotes",
   commands: [
-    `/${COMMANDS.addQuote} — add a new quote.`,
-    `/${COMMANDS.removeQuote} — remove a quote.`,
+    `/${COMMANDS.QUOTE_NEW} — add a new quote.`,
+    `/${COMMANDS.QUOTE_DELETE} — remove a quote.`,
   ],
 };
 export const COMMAND_GROUPS = [

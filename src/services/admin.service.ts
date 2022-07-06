@@ -1,21 +1,21 @@
 import { dbClient } from "../libs";
 
 export const findAllAdmins = async () => {
-  const admins = await dbClient.person.findMany({
+  const ADMIN_LIST = await dbClient.person.findMany({
     where: {
       role: "ADMIN",
     },
   });
-  return admins;
+  return ADMIN_LIST;
 };
 
 export const getAdminList = async () => {
-  const admins = await findAllAdmins();
-  if (admins.length <= 0) return "Admin list empty.";
+  const ADMIN_LIST = await findAllAdmins();
+  if (ADMIN_LIST.length <= 0) return "Admin list empty.";
 
   let message = "Admins:";
 
-  const sortedAdmins = admins.sort((a, b) => {
+  const sortedAdmins = ADMIN_LIST.sort((a, b) => {
     if (a.name > b.name) return -1;
     if (a.name < b.name) return 1;
     return 0;
@@ -29,7 +29,7 @@ export const getAdminList = async () => {
   return message;
 };
 
-export const addGlobalAdmin = async (name: string, id: number) => {
+export const ADMIN_NEW = async (name: string, id: number) => {
   const addedAdmin = await dbClient.person.upsert({
     where: {
       id,
@@ -49,7 +49,7 @@ export const addGlobalAdmin = async (name: string, id: number) => {
   return addedAdmin;
 };
 
-export const removeGlobalAdmin = async (id: number) => {
+export const ADMIN_DELETE = async (id: number) => {
   await dbClient.person.delete({
     where: { id },
   });
