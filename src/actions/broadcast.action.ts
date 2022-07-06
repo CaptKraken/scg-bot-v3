@@ -6,13 +6,14 @@ import {
   cancelKey,
   errorHandler,
   goBackBroadcastKey,
+  removeCommand,
   sendDisappearingMessage,
 } from "../libs/utils";
 import {
-  deleteFolder,
   findOneFolder,
   addGroupToFolder,
   removeGroupFromFolder,
+  deleteFolder,
 } from "../services/folder.service";
 
 export const emitBroadcastAction = async (ctx: MyContext) => {
@@ -21,13 +22,9 @@ export const emitBroadcastAction = async (ctx: MyContext) => {
     ctx.deleteMessage();
 
     // @ts-ignore
-    const callbackData = ctx.callbackQuery.data;
-    if (!callbackData) return;
+    if (!ctx.cleanedCallback) return;
 
-    const parts = callbackData
-      .replace(COMMANDS.emit, "")
-      .split(" -")
-      .map((part) => part);
+    const parts = ctx.cleanedCallback.split(" -").map((part) => part.trim());
 
     let folderName = "",
       message = "";
@@ -67,19 +64,13 @@ export const emitBroadcastAction = async (ctx: MyContext) => {
   }
 };
 
-export const addGroupBroadcastAction = async (ctx: MyContext) => {
+export const GROUP_NEW_ACTION = async (ctx: MyContext) => {
   try {
     ctx.answerCbQuery();
     ctx.deleteMessage();
+    if (!ctx.cleanedCallback) return;
 
-    // @ts-ignore
-    const callbackData = ctx.callbackQuery.data;
-    if (!callbackData) return;
-
-    const folderName = callbackData
-      .replaceAll(`${COMMANDS.addGroupBroadcastAction}`, "")
-      .trim();
-    console.log(folderName);
+    const folderName = ctx.cleanedCallback;
 
     if (!folderName) {
       throw new Error(`Folder not found.`);
@@ -98,17 +89,14 @@ export const addGroupBroadcastAction = async (ctx: MyContext) => {
   }
 };
 
-export const deleteFolderAction = async (ctx: MyContext) => {
+export const FOLDER_DELETE_ACTION = async (ctx: MyContext) => {
   try {
     ctx.answerCbQuery();
     ctx.deleteMessage();
-    // @ts-ignore
-    const callbackData = ctx.callbackQuery.data;
-    if (!callbackData) return;
 
-    const folderName = callbackData
-      .replaceAll(`${COMMANDS.deleteFolderAction}`, "")
-      .trim();
+    if (!ctx.cleanedCallback) return;
+
+    const folderName = ctx.cleanedCallback;
     await deleteFolder({ name: folderName });
     await sendDisappearingMessage(
       ctx.chatId,
@@ -119,18 +107,14 @@ export const deleteFolderAction = async (ctx: MyContext) => {
   }
 };
 
-export const showRemoveGroupBroadcastAction = async (ctx: MyContext) => {
+export const GROUP_LIST_DELETE_ACTION = async (ctx: MyContext) => {
   try {
     ctx.answerCbQuery();
     ctx.deleteMessage();
 
-    // @ts-ignore
-    const callbackData = ctx.callbackQuery.data;
-    if (!callbackData) return;
+    if (!ctx.cleanedCallback) return;
 
-    const folderName = callbackData
-      .replaceAll(`${COMMANDS.showRemoveGroupBroadcastAction}`, "")
-      .trim();
+    const folderName = ctx.cleanedCallback;
 
     const folderData = await findOneFolder({ name: `${folderName}` });
 
@@ -150,7 +134,7 @@ export const showRemoveGroupBroadcastAction = async (ctx: MyContext) => {
     groups.forEach(({ id, name }, i) => {
       tempKeys.push({
         text: name,
-        callback_data: `${COMMANDS.removeGroupBroadcastAction} -f${folderName} -g${id}`,
+        callback_data: `${COMMANDS.GROUP_DELETE_ACTION} -f${folderName} -g${id}`,
       });
       if (tempKeys.length === 2 || groups.length - 1 === i) {
         allKeys.push(tempKeys);
@@ -173,19 +157,14 @@ export const showRemoveGroupBroadcastAction = async (ctx: MyContext) => {
   }
 };
 
-export const removeGroupBroadcastAction = async (ctx: MyContext) => {
+export const GROUP_DELETE_ACTION = async (ctx: MyContext) => {
   try {
     ctx.answerCbQuery();
     ctx.deleteMessage();
 
-    // @ts-ignore
-    const callbackData = ctx.callbackQuery.data;
-    if (!callbackData) return;
+    if (!ctx.cleanedCallback) return;
 
-    const parts = callbackData
-      .replaceAll(`${COMMANDS.removeGroupBroadcastAction}`, "")
-      .split(" -")
-      .filter((part) => part);
+    const parts = ctx.cleanedCallback.split(" -").filter((part) => part);
 
     const payload = {
       folder_name: "",
@@ -215,7 +194,7 @@ export const removeGroupBroadcastAction = async (ctx: MyContext) => {
   }
 };
 
-export const goBackBroadcastAction = async (ctx: MyContext) => {
+export const BROADCAST_BACK_ACTION = async (ctx: MyContext) => {
   await ctx.answerCbQuery();
   await ctx.deleteMessage();
   await removeGroupBroadcastCommand(ctx);

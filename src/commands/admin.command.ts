@@ -1,21 +1,42 @@
 import { Update } from "typegram";
 import { Context } from "telegraf";
 import {
+  csvToTable,
   errorHandler,
   isSenderAdmin,
   sendDisappearingMessage,
 } from "../libs/utils";
 import {
-  addGlobalAdmin,
+  ADMIN_NEW,
   getAdminList,
-  removeGlobalAdmin,
+  ADMIN_DELETE,
 } from "../services/admin.service";
 import { MyContext } from "../index";
+import { dbClient } from "../libs";
 
 export const sendAdminListCommand = async (ctx: MyContext) => {
   try {
-    const adminList = await getAdminList();
-    return ctx.reply(adminList);
+    const adminList = await dbClient.person.findMany({
+      orderBy: {
+        name: "asc",
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+    let csv = `,ID,Name`;
+
+    adminList.map((admin, i) => {
+      csv +=
+        `\n` + `${i + 1}`.padStart(2, "0") + "," + admin.id + "," + admin.name;
+    });
+
+    const list = csvToTable(csv, ",", true);
+
+    return ctx.reply(`\`\`\`${list}\n\nTotal: ${adminList.length}\`\`\``, {
+      parse_mode: "MarkdownV2",
+    });
   } catch (error) {
     errorHandler(ctx.chatId, error);
   }
@@ -37,7 +58,7 @@ export const addGlobalAdminCommand = async (ctx: MyContext) => {
     const userName =
       firstName && lastName ? `${firstName} ${lastName}` : `${username}`;
 
-    await addGlobalAdmin(userName, userId);
+    await ADMIN_NEW(userName, userId);
     await sendDisappearingMessage(
       ctx.chatId,
       `[Success]: "${userName}" is added to the database.`
@@ -55,7 +76,7 @@ export const removeGlobalAdminCommand = async (ctx: MyContext) => {
 
     const userId = toBeAdmin.id;
 
-    await removeGlobalAdmin(userId);
+    await ADMIN_DELETE(userId);
     await sendDisappearingMessage(
       ctx.chatId,
       `[Success]: User removed from the database.`

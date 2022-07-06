@@ -3,63 +3,61 @@ import { COMMANDS } from "../libs/constants";
 import {
   cancelKey,
   errorHandler,
+  removeCommand,
   sendDisappearingMessage,
 } from "../libs/utils";
 import {
   createFolder,
   findAllFolders,
-  renameFolder,
+  updateFolder,
 } from "../services/folder.service";
 
 export const emitBroadcastCommand = async (ctx: MyContext) => {
-  // @ts-ignore
-  const message = ctx.message.text
-    .replace(`/${COMMANDS.emit} `, "")
-    .replace(`/${COMMANDS.emit}\n`, "")
-    .trim();
+  try {
+    if (!ctx.cleanedMessage) throw new Error("no message recieved.");
 
-  const folders = await findAllFolders();
-  if (folders.length < 1) {
-    return await ctx.reply("[Info]: No folder found.");
-  }
-
-  type Keyboard = {
-    callback_data: string;
-    text: string;
-  };
-
-  const allKeys: any[] = [];
-  let tempKeys: Keyboard[] = [];
-  folders.forEach(({ name, groups }, i) => {
-    if (groups.length > 0) {
-      tempKeys.push({
-        text: `${name} (${groups.length})`,
-        callback_data: `${COMMANDS.emit} -f${name} -m${message}`,
-      });
+    const folders = await findAllFolders();
+    if (folders.length < 1) {
+      return await ctx.reply("[Info]: No folder found.");
     }
-    if (tempKeys.length === 2 || folders.length - 1 === i) {
-      allKeys.push(tempKeys);
-      tempKeys = [];
+
+    type Keyboard = {
+      callback_data: string;
+      text: string;
+    };
+
+    const allKeys: any[] = [];
+    let tempKeys: Keyboard[] = [];
+    folders.forEach(({ name, groups }, i) => {
+      if (groups.length > 0) {
+        tempKeys.push({
+          text: `${name} (${groups.length})`,
+          callback_data: `${COMMANDS.EMIT_ACTION} -f${name} -m${ctx.cleanedMessage}`,
+        });
+      }
+      if (tempKeys.length === 2 || folders.length - 1 === i) {
+        allKeys.push(tempKeys);
+        tempKeys = [];
+      }
+    });
+    if (allKeys.length > 0) {
+      allKeys.push(cancelKey);
     }
-  });
-  if (allKeys.length > 0) {
-    allKeys.push(cancelKey);
+    await ctx.reply(`Select folder:\n(Folders with 0 group are hidden)`, {
+      reply_markup: {
+        resize_keyboard: true,
+        one_time_keyboard: true,
+        inline_keyboard: allKeys,
+      },
+    });
+  } catch (error) {
+    errorHandler(ctx.chatId, error);
   }
-  await ctx.reply(`Select folder:\n(Folders with 0 group are hidden)`, {
-    reply_markup: {
-      resize_keyboard: true,
-      one_time_keyboard: true,
-      inline_keyboard: allKeys,
-    },
-  });
 };
 
 export const createFolderCommand = async (ctx: MyContext) => {
   try {
-    //@ts-ignore
-    const message = ctx.message.text;
-
-    const folderName = message.replace(`/${COMMANDS.createFolder}`, "").trim();
+    const folderName = ctx.cleanedMessage;
     if (!folderName) {
       throw new Error("folder name not found.");
     }
@@ -75,13 +73,10 @@ export const createFolderCommand = async (ctx: MyContext) => {
 
 export const renameFolderCommand = async (ctx: MyContext) => {
   try {
-    // @ts-ignore
-    const message: string = ctx.message.text;
-    const parts = message
-      .replace(`/${COMMANDS.renameFolder}`, "")
-      .trim()
-      .split("-")
-      .map((part) => part.trim());
+    if (!ctx.cleanedMessage) {
+      throw new Error(`Not enough data received.`);
+    }
+    const parts = ctx.cleanedMessage.split("-").map((part) => part.trim());
 
     type RenameFolderDTO = {
       folderName: string;
@@ -107,11 +102,11 @@ export const renameFolderCommand = async (ctx: MyContext) => {
 
     if (!isOldNameValid || !isNewNameValid) {
       ctx.reply(
-        `Old name or new name wasn't given.\ni.e. /renameFolder -o old name -n new name`
+        `Old name or new name wasn't given.\ni.e. /FOLDER_EDIT -o old name -n new name`
       );
     }
 
-    await renameFolder(payload.folderName, payload.newName);
+    await updateFolder(payload.folderName, payload.newName);
     await sendDisappearingMessage(
       ctx.chatId,
       `[Success]: Folder "${payload.folderName}" has been succesfully renamed to "${payload.newName}".`
@@ -139,7 +134,7 @@ export const deleteFolderCommand = async (ctx: MyContext) => {
     folders.forEach(({ name }, i) => {
       tempKeys.push({
         text: name,
-        callback_data: `${COMMANDS.deleteFolderAction} ${name}`,
+        callback_data: `${COMMANDS.FOLDER_DELETE_ACTION} ${name}`,
       });
       if (tempKeys.length === 2 || folders.length - 1 === i) {
         allKeys.push(tempKeys);
@@ -168,8 +163,7 @@ export const addGroupBroadcastCommand = async (ctx: MyContext) => {
     }
     const folders = await findAllFolders();
     if (folders.length < 1) {
-      await ctx.reply("[Info]: No folders found.");
-      return;
+      return await ctx.reply("[Info]: No folders found.");
     }
 
     type Keyboard = {
@@ -177,12 +171,12 @@ export const addGroupBroadcastCommand = async (ctx: MyContext) => {
       text: string;
     };
 
-    const allKeys: any[] = [];
+    const allKeys: Keyboard[][] = [];
     let tempKeys: Keyboard[] = [];
     folders.forEach(({ name }, i) => {
       tempKeys.push({
         text: name,
-        callback_data: `${COMMANDS.addGroupBroadcastAction} ${name}`,
+        callback_data: `${COMMANDS.GROUP_NEW_ACTION} ${name}`,
       });
       if (tempKeys.length === 2 || folders.length - 1 === i) {
         allKeys.push(tempKeys);
@@ -222,7 +216,7 @@ export const removeGroupBroadcastCommand = async (ctx: MyContext) => {
     folders.forEach(({ name, groups }, i) => {
       tempKeys.push({
         text: `${name} (${groups.length})`,
-        callback_data: `${COMMANDS.showRemoveGroupBroadcastAction} ${name}`,
+        callback_data: `${COMMANDS.GROUP_LIST_DELETE_ACTION} ${name}`,
       });
       if (tempKeys.length === 2 || folders.length - 1 === i) {
         allKeys.push(tempKeys);

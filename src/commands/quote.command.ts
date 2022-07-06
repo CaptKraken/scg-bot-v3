@@ -1,16 +1,19 @@
 import { Context } from "telegraf";
 import { Update } from "typegram";
 import { MyContext } from "../index";
+import { dbClient } from "../libs";
 import { COMMANDS } from "../libs/constants";
-import { errorHandler, sendDisappearingMessage } from "../libs/utils";
+import {
+  csvToTable,
+  errorHandler,
+  sendDisappearingMessage,
+} from "../libs/utils";
 import { createQuote, deleteQuote } from "../services/quote.service";
 
 export const addQuoteCommand = async (ctx: MyContext) => {
   try {
     // @ts-ignore
-    const quote: string | undefined = ctx.message.text
-      .replace(`/${COMMANDS.addQuote}`, "")
-      .trim();
+    const quote: string | undefined = ctx.cleanedMessage.trim();
     if (!quote) return;
     await createQuote(quote);
     await sendDisappearingMessage(ctx.chatId, `[Success]: '${quote}' added.`);
@@ -19,12 +22,25 @@ export const addQuoteCommand = async (ctx: MyContext) => {
   }
 };
 
+export const viewQuoteCommand = async (ctx: MyContext) => {
+  const quotes = await dbClient.quote.findMany({
+    orderBy: { id: "asc" },
+    select: { id: true, text: true },
+  });
+  let csv = "ID\tQuote";
+  quotes.map((quote) => {
+    csv += "\n" + quote.id + "\t" + quote.text;
+  });
+  const mdTable = csvToTable(csv, "\t", true);
+
+  return ctx.reply(`\`\`\`${mdTable}\n\nTotal: ${quotes.length}\`\`\``, {
+    parse_mode: "MarkdownV2",
+  });
+};
+
 export const removeQuoteCommand = async (ctx: MyContext) => {
   try {
-    // @ts-ignore
-    const message: string | undefined = ctx.message.text
-      ?.replace(`/${COMMANDS.removeQuote}`, "")
-      ?.trim();
+    const message = ctx.cleanedMessage.trim();
     if (!message) return;
 
     const payload = isNaN(Number(message))
