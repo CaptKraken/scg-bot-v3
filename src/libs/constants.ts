@@ -8,9 +8,11 @@ export const COMMANDS = {
   DC_EDIT: "editdc",
   /** "listdc" */
   DC_LIST: "listdc",
+  /** "skipdc" */
+  DAY_SKIP: "skipdc",
 
   // ADMINS //
-  /**listadmins */
+  /** "listadmins" */
   ADMIN_LIST: "listadmins",
   /** "newadmin" */
   ADMIN_NEW: "newadmin",

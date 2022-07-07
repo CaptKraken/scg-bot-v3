@@ -64,7 +64,7 @@ export const emitBroadcastAction = async (ctx: MyContext) => {
   }
 };
 
-export const GROUP_NEW_ACTION = async (ctx: MyContext) => {
+export const addGroupToFolderAction = async (ctx: MyContext) => {
   try {
     ctx.answerCbQuery();
     ctx.deleteMessage();
@@ -89,7 +89,7 @@ export const GROUP_NEW_ACTION = async (ctx: MyContext) => {
   }
 };
 
-export const FOLDER_DELETE_ACTION = async (ctx: MyContext) => {
+export const deleteFolderAction = async (ctx: MyContext) => {
   try {
     ctx.answerCbQuery();
     ctx.deleteMessage();
@@ -107,7 +107,7 @@ export const FOLDER_DELETE_ACTION = async (ctx: MyContext) => {
   }
 };
 
-export const GROUP_LIST_DELETE_ACTION = async (ctx: MyContext) => {
+export const listGroupsOfFolderAction = async (ctx: MyContext) => {
   try {
     ctx.answerCbQuery();
     ctx.deleteMessage();
@@ -157,7 +157,7 @@ export const GROUP_LIST_DELETE_ACTION = async (ctx: MyContext) => {
   }
 };
 
-export const GROUP_DELETE_ACTION = async (ctx: MyContext) => {
+export const deleteGroupFromFolderAction = async (ctx: MyContext) => {
   try {
     ctx.answerCbQuery();
     ctx.deleteMessage();
@@ -194,7 +194,7 @@ export const GROUP_DELETE_ACTION = async (ctx: MyContext) => {
   }
 };
 
-export const BROADCAST_BACK_ACTION = async (ctx: MyContext) => {
+export const goBackBroadcastAction = async (ctx: MyContext) => {
   await ctx.answerCbQuery();
   await ctx.deleteMessage();
   await removeGroupBroadcastCommand(ctx);
