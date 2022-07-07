@@ -68,7 +68,9 @@ export const updateGroupCommand = async (ctx: MyContext) => {
       message,
     });
 
-    restartCronJobs();
+    if (schedule) {
+      restartCronJobs();
+    }
     sendDisappearingMessage(
       ctx.chatId,
       // @ts-ignore
