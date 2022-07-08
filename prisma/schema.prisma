@@ -54,9 +54,20 @@ model DayCount {
   dayCount        Int        @default(0)
   schedule        String     @db.VarChar(255) @default("0 0 * * *") 
   message         String     @db.VarChar(255) @default("ថ្ងៃទី {day_count}")
+  skips           SkipDayCount[]
   createdAt       DateTime?   @default(now())
   updatedAt       DateTime?   @updatedAt
   @@map("day_counts")
+}
+
+model SkipDayCount {
+  id              Int        @id @default(autoincrement())
+  dayCountId      Int
+  dayCount        DayCount   @relation(fields: [dayCountId], references: [id], onDelete: Cascade)
+  date            DateTime?
+  createdAt       DateTime?   @default(now())
+  updatedAt       DateTime?   @updatedAt
+   @@map("dc_skips")
 }
 
 model Folder {
