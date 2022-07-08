@@ -1,4 +1,10 @@
 export const COMMANDS = {
+  // MISCELLANEOUS //
+  /** "info" */
+  INFO: "info",
+  /** "check" */
+  CHECK: "check",
+
   // DAY COUNT //
   /** "newdc" */
   DC_NEW: "newdc",
@@ -8,9 +14,11 @@ export const COMMANDS = {
   DC_EDIT: "editdc",
   /** "listdc" */
   DC_LIST: "listdc",
+  /** "skipdc" */
+  DAY_SKIP: "skipdc",
 
   // ADMINS //
-  /**listadmins */
+  /** "listadmins" */
   ADMIN_LIST: "listadmins",
   /** "newadmin" */
   ADMIN_NEW: "newadmin",
@@ -57,16 +65,17 @@ export const COMMANDS = {
   /** "go-back-broadcast-action" */
   BROADCAST_BACK_ACTION: "go-back-broadcast-action",
 };
-const dayCountCommands = {
+export const dayCountCommands = {
   name: "Day Count",
   commands: [
     `/${COMMANDS.DC_NEW} -d 1 -s "0 5 * * *" -m "whatever {day_count} you want." — create new day count record for the group.`,
     `/${COMMANDS.DC_EDIT} -id 1 -d 1 -s "0 5 * * *" -m "whatever {day_count} you want." — update day count with the given id.`,
     `/${COMMANDS.DC_DELETE} — remove day count.`,
     `/${COMMANDS.DC_LIST} - list all day count records of a group.`,
+    `/${COMMANDS.DAY_SKIP} {-id 12 | -a | -g} -d? 1/2/2022 - list all day count records of a group.`,
   ],
 };
-const broadcastCommands = {
+export const broadcastCommands = {
   name: "Broadcast",
   commands: [
     `/${COMMANDS.FOLDER_NEW} folder name — create a new folder.`,
@@ -77,14 +86,14 @@ const broadcastCommands = {
     `/${COMMANDS.EMIT} message here — mass send message to a folder group.`,
   ],
 };
-const readingGroupCommands = {
+export const readingGroupCommands = {
   name: "Reading Group",
   commands: [
     `/${COMMANDS.READER_DELETE} reader name — remove reader from reading group.`,
     `/${COMMANDS.READER_LIST} — send report to the reading group.`,
   ],
 };
-const adminCommands = {
+export const adminCommands = {
   name: "Admins",
   commands: [
     `/${COMMANDS.ADMIN_LIST} — send admin list.`,
@@ -92,7 +101,7 @@ const adminCommands = {
     `/${COMMANDS.ADMIN_DELETE} {reply} — remove user from admin database.`,
   ],
 };
-const quoteCommands = {
+export const quoteCommands = {
   name: "Quotes",
   commands: [
     `/${COMMANDS.QUOTE_NEW} — add a new quote.`,

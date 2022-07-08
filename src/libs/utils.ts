@@ -168,6 +168,17 @@ export const errorHandler = async (group_id: number, e: unknown) => {
         }`
       );
     }
+    if (e.code === "P2003") {
+      return sendDisappearingErrorMessage(
+        group_id,
+        `${
+          e.meta?.target
+            ? //@ts-ignore
+              `Duplication Error: ${e.meta?.target[0]} `
+            : "Duplication Error."
+        }`
+      );
+    }
     if (e.code === "P2025") {
       return sendDisappearingErrorMessage(
         group_id,
@@ -185,15 +196,20 @@ export const errorHandler = async (group_id: number, e: unknown) => {
         `Invalid schedule expression received.`
       );
     }
-    sendDisappearingErrorMessage(group_id, `${message}`);
+    return sendDisappearingErrorMessage(group_id, `${message}`);
   }
 };
 
 export const sendDisappearingErrorMessage = async (
   group_id: number,
-  message: string
+  message: string,
+  durationInSeconds?: number
 ) => {
-  await sendDisappearingMessage(group_id, `[Error]: ${message}`);
+  await sendDisappearingMessage(
+    group_id,
+    `[Error]: ${message}`,
+    durationInSeconds
+  );
 };
 
 export const deleteMessage = async (chat_id: number, message_id: number) => {
@@ -218,10 +234,8 @@ export const sendDisappearingMessage = async (
 ) => {
   const res = await sendMessage(
     group_id,
-    `${cleanMessage(
-      message
-    )}\n*_This message will be automatically deleted in ${durationInSeconds} seconds_*`,
-    "MarkdownV2"
+    `${message}\n_This message will be automatically deleted in ${durationInSeconds} seconds_`,
+    "Markdown"
   );
 
   setTimeout(async () => {
