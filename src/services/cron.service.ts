@@ -11,6 +11,8 @@ export const createCronJobs = async () => {
         id: true,
         groupId: true,
         schedule: true,
+        message: true,
+        dayCount: true,
       },
     })
     .then((dayCounts) => {
