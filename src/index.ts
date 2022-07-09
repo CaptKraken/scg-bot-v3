@@ -104,6 +104,7 @@ bot.command(COMMANDS.READER_LIST, readReportCommand);
 bot.command(COMMANDS.DC_NEW, setGroupCommand);
 bot.command(COMMANDS.DC_EDIT, updateGroupCommand);
 bot.command(COMMANDS.DC_CONTROL, async (ctx) => {
+  // TODO: increase, decrease (1, -1) -id -g -a
   console.log("msg", ctx.cleanedMessage);
 });
 bot.command(COMMANDS.DC_DELETE, removeGroupCommand);
