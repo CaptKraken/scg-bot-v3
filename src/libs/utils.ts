@@ -273,8 +273,8 @@ export const getSetGroupResult = (message: string) => {
         const message = flag
           .replace("m ", "")
           .trim()
-          .replaceAll(`"`, "")
-          .replaceAll(`'`, "");
+          .replace(/"/g, "")
+          .replace(/'/g, "");
         if (message) {
           result.message = message;
         }
@@ -295,8 +295,8 @@ export const getSetGroupResult = (message: string) => {
         const schedule = flag
           .replace("s ", "")
           .trim()
-          .replaceAll(`"`, "")
-          .replaceAll(`'`, "");
+          .replace(/"/g, "")
+          .replace(/'/g, "");
         result.schedule = schedule;
       }
     });
@@ -347,21 +347,24 @@ export const csvToTable = (
 
 export const removeCommand = (message: string) => {
   const trimmedMessage = message.trim();
+
+  if (!trimmedMessage) return "";
   let result = trimmedMessage;
 
   const commands = Object.values(COMMANDS);
   commands.map((command) => {
-    const isMatchCommand = trimmedMessage.startsWith("/" + command);
+    const isMatchCommand = trimmedMessage?.startsWith("/" + command);
     const isMatchAction =
-      trimmedMessage.startsWith(command) && trimmedMessage.includes("-action");
+      trimmedMessage?.startsWith(command) &&
+      trimmedMessage?.includes("-action");
 
     if (isMatchCommand) {
       result = trimmedMessage
-        .replaceAll(`/${command}@${BOT_USERNAME}`, "")
-        .replaceAll("/" + command, "");
+        ?.replace(`/${command}@${BOT_USERNAME}`, "")
+        ?.replace("/" + command, "");
     }
     if (isMatchAction) {
-      result = message.replaceAll(command, "");
+      result = trimmedMessage?.replace(command, "");
     }
   });
 

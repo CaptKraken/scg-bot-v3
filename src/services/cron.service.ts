@@ -33,8 +33,8 @@ export const createCronJobs = async () => {
           }
 
           const uncleanedMessage = data.message;
-          const message = `${uncleanedMessage?.replaceAll(
-            "{day_count}",
+          const message = `${uncleanedMessage?.replace(
+            /\{day_count}/g,
             `${data.dayCount}`
           )}`;
 

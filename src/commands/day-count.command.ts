@@ -194,8 +194,8 @@ export const skipDayCountCommand = async (ctx: MyContext) => {
       if (hasDate && part.startsWith("d")) {
         const recievedDate = part
           .replace("d", "")
-          .replaceAll(`"`, "")
-          .replaceAll(`'`, "")
+          .replace(/"/g, "")
+          .replace(/'/g, "")
           .trim();
         data["date"] = khmerDateToISO(recievedDate);
       } else {
