@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { MyContext } from "../index";
 import { dbClient } from "../libs";
 import { COMMANDS, COMMAND_GROUPS, dayCountCommands } from "../libs/constants";
+import { getTomorrow, khmerDateToISO } from "../libs/time.utils";
 import {
   csvToTable,
   errorHandler,
@@ -21,6 +22,9 @@ import {
   createGlobalSkips,
   createGroupSkips,
   createSkip,
+  deleteGroupSkips,
+  deleteManySkips,
+  deleteOneSkip,
 } from "../services/skip-day-count.service";
 
 export const setGroupCommand = async (ctx: MyContext) => {
@@ -105,10 +109,14 @@ export const removeGroupCommand = async (ctx: MyContext) => {
 };
 
 export const listDayCountCommand = async (ctx: MyContext) => {
+  const showAll = ctx.cleanedMessage.includes("-a");
+
   const dayCounts = await dbClient.dayCount.findMany({
-    where: {
-      groupId: ctx.chatId,
-    },
+    where: showAll
+      ? {}
+      : {
+          groupId: ctx.chatId,
+        },
     orderBy: [
       {
         id: "asc",
@@ -136,33 +144,6 @@ export const listDayCountCommand = async (ctx: MyContext) => {
   });
 };
 
-export const isValidDate = (date: Date | string) => {
-  return !isNaN(new Date(date).getTime());
-};
-
-const khmerDateToISO = (date: string) => {
-  if (!date) return undefined;
-  const parts = date.split("/");
-  const { day, month, year } = {
-    day: parts[0],
-    month: parts[1],
-    year: parts[2],
-  };
-
-  const formatted = new Date(
-    `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T00:00:00.000Z`
-  );
-
-  return isValidDate(formatted) ? formatted : undefined;
-};
-const getTomorrow = () => {
-  const today = new Date();
-  let tomorrow = new Date(new Date().setDate(today.getDate() + 1));
-  // idk why. UTC +7, maybe?
-  tomorrow = new Date(new Date(tomorrow).setHours(7, 0, 0, 0));
-  return tomorrow;
-};
-
 export const skipDayCountCommand = async (ctx: MyContext) => {
   const data: {
     date?: Date;
@@ -178,7 +159,7 @@ export const skipDayCountCommand = async (ctx: MyContext) => {
   try {
     if (!ctx.cleanedMessage) {
       const guide = dayCountCommands.commands
-        .filter((command) => command.includes(COMMANDS.DAY_SKIP))
+        .filter((command) => command.includes(COMMANDS.SKIP_NEW))
         .join();
 
       return sendDisappearingErrorMessage(
@@ -258,5 +239,82 @@ export const skipDayCountCommand = async (ctx: MyContext) => {
     }
 
     errorHandler(ctx.chatId, error);
+  }
+};
+
+export const deleteSkipCommand = async (ctx: MyContext) => {
+  // -a -g -id -d
+
+  const data: {
+    date?: Date;
+    id?: number;
+    group: boolean;
+    all: boolean;
+  } = {
+    date: undefined,
+    id: undefined,
+    group: false,
+    all: false,
+  };
+  if (!ctx.cleanedMessage) {
+    // TODO: Update this to use the right command
+    const guide = dayCountCommands.commands
+      .filter((command) => command.includes(COMMANDS.SKIP_DELETE))
+      .join();
+
+    return sendDisappearingErrorMessage(
+      ctx.chatId,
+      `Insufficient data.\nUsage: ${guide}`,
+      10
+    );
+  }
+
+  const parts = ctx.cleanedMessage.split("-").filter((part) => part.trim());
+
+  parts.map((part) => {
+    if (part.startsWith("d")) {
+      const recievedDate = part
+        .replace("d", "")
+        .replace(/"/g, "")
+        .replace(/'/g, "")
+        .trim();
+      data["date"] = khmerDateToISO(recievedDate);
+    }
+
+    if (part.startsWith("id")) {
+      const id = Number(part.replace("id", "").trim());
+      if (isNaN(id)) return;
+      data["id"] = id;
+    }
+
+    if (part.startsWith("a")) {
+      data["all"] = true;
+    }
+
+    if (part.startsWith("g")) {
+      data["group"] = true;
+    }
+  });
+
+  const dateText = data.date?.toLocaleDateString("km-KH", {
+    dateStyle: "full",
+  });
+  const successMsg = dateText
+    ? `Skip schedule on ${dateText} deleted.`
+    : "Skip schedule deleted.";
+
+  if (data.group) {
+    await deleteGroupSkips(ctx.chatId, data.date);
+    return sendDisappearingMessage(ctx.chatId, successMsg);
+  }
+
+  if (data.all) {
+    await deleteManySkips(data.id, data.date); // delete all
+    return sendDisappearingMessage(ctx.chatId, successMsg);
+  }
+
+  if (data.id) {
+    await deleteOneSkip(data.id);
+    return sendDisappearingMessage(ctx.chatId, successMsg);
   }
 };

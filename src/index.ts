@@ -6,7 +6,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { initCronJobs } from "./services/cron.service";
 import { debug } from "util";
-import { COMMANDS } from "./libs/constants";
+import { COMMANDS, dayCountCommands } from "./libs/constants";
 import {
   addGlobalAdminCommand,
   removeGlobalAdminCommand,
@@ -27,7 +27,7 @@ import {
   isAdminMiddleware,
 } from "./middlewares/bot.middleware";
 import {
-  isValidDate,
+  deleteSkipCommand,
   listDayCountCommand,
   removeGroupCommand,
   setGroupCommand,
@@ -57,12 +57,22 @@ import {
   helpCommand,
   checkCommand,
 } from "./commands/misc.command";
+import {
+  deleteGroupSkips,
+  deleteManySkips,
+  deleteOneSkip,
+} from "./services/skip-day-count.service";
+import {
+  sendDisappearingErrorMessage,
+  sendDisappearingMessage,
+} from "./libs/utils";
+import { getTomorrow } from "./libs/time.utils";
 dotenv.config();
 
 const { BOT_TOKEN, SERVER_URL } = process.env;
 
 // TODO: IMPLIMENT SKIP FUNCTION
-// TODO: CRON JOB INCREASE 1 PER DAY, NOT EVERY JOB.
+
 export interface MyContext extends Context {
   senderId: number;
   chatId: number;
@@ -71,7 +81,6 @@ export interface MyContext extends Context {
   cleanedMessage: string;
   cleanedCallback: string;
 }
-
 const bot = new Telegraf<MyContext>(BOT_TOKEN as string);
 
 bot.use(formatMiddleware);
@@ -86,7 +95,6 @@ bot.on("edited_message", (ctx) => updateReadCountCommand(ctx, false));
 
 bot.use(isAdminMiddleware);
 bot.command(COMMANDS.CHECK, checkCommand);
-bot.command(COMMANDS.DAY_SKIP, skipDayCountCommand);
 //#region Read delete+read report
 bot.command(COMMANDS.READER_DELETE, removeReaderCommand);
 bot.command(COMMANDS.READER_LIST, readReportCommand);
@@ -95,8 +103,13 @@ bot.command(COMMANDS.READER_LIST, readReportCommand);
 //#region Day Count
 bot.command(COMMANDS.DC_NEW, setGroupCommand);
 bot.command(COMMANDS.DC_EDIT, updateGroupCommand);
+bot.command(COMMANDS.DC_CONTROL, async (ctx) => {
+  console.log("msg", ctx.cleanedMessage);
+});
 bot.command(COMMANDS.DC_DELETE, removeGroupCommand);
 bot.command(COMMANDS.DC_LIST, listDayCountCommand);
+bot.command(COMMANDS.SKIP_NEW, skipDayCountCommand);
+bot.command(COMMANDS.SKIP_DELETE, deleteSkipCommand);
 //#endregion
 
 //#region Admins

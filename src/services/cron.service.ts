@@ -1,8 +1,10 @@
 import cron from "node-cron";
 import { dbClient } from "../libs";
+import { getToday } from "../libs/time.utils";
 import { errorHandler, sendMessage } from "../libs/utils";
 import { findAllDayCounts, increaseDayCount } from "./day-count.service";
 import { sendReport } from "./reader.service";
+import { deleteManySkips, findSkips } from "./skip-day-count.service";
 
 export const createCronJobs = async () => {
   const all = await dbClient.dayCount
@@ -11,8 +13,6 @@ export const createCronJobs = async () => {
         id: true,
         groupId: true,
         schedule: true,
-        message: true,
-        dayCount: true,
       },
     })
     .then((dayCounts) => {
@@ -26,8 +26,14 @@ export const createCronJobs = async () => {
       `${dc.schedule}`,
       async () => {
         try {
-          const data = await increaseDayCount(dc.id);
+          const today = getToday();
+          const skips = await findSkips(dc.id, today);
 
+          if (skips.length > 0) {
+            return await deleteManySkips(dc.id, today);
+          }
+
+          const data = await increaseDayCount(dc.id);
           if (dc.id === Number(process.env.READING_GROUP_DAY_COUNT_ID)) {
             return sendReport();
           }
