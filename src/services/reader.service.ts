@@ -93,7 +93,6 @@ export const deleteReader = async ({
   accountId?: number;
   readerName?: string;
 }) => {
-  console.log(accountId, readerName);
   if (!accountId && !readerName) {
     throw new Error("account id or reader name required.");
   }

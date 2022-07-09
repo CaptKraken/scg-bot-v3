@@ -12,10 +12,14 @@ export const COMMANDS = {
   DC_DELETE: "deletedc",
   /** "editdc" */
   DC_EDIT: "editdc",
+  /** "ctldc" */
+  DC_CONTROL: "ctldc",
   /** "listdc" */
   DC_LIST: "listdc",
-  /** "skipdc" */
-  DAY_SKIP: "skipdc",
+  /** "newskip" */
+  SKIP_NEW: "newskip",
+  /** "deleteskip" */
+  SKIP_DELETE: "deleteskip",
 
   // ADMINS //
   /** "listadmins" */
@@ -72,7 +76,7 @@ export const dayCountCommands = {
     `/${COMMANDS.DC_EDIT} -id 1 -d 1 -s "0 5 * * *" -m "whatever {day_count} you want." — update day count with the given id.`,
     `/${COMMANDS.DC_DELETE} — remove day count.`,
     `/${COMMANDS.DC_LIST} - list all day count records of a group.`,
-    `/${COMMANDS.DAY_SKIP} {-id 12 | -a | -g} -d? 1/2/2022 - list all day count records of a group.`,
+    `/${COMMANDS.SKIP_NEW} {-id 12 | -a | -g} -d? 1/2/2022 - list all day count records of a group.`,
   ],
 };
 export const broadcastCommands = {
