@@ -42,7 +42,7 @@ export const deleteManySkips = async (dayCountId?: number, date?: Date) => {
     payload["date"] = date;
   }
   // if nothing got passed, delete everything.
-  await dbClient.skipDayCount.deleteMany({
+  return await dbClient.skipDayCount.deleteMany({
     where: payload,
   });
 };

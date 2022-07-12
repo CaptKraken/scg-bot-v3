@@ -69,14 +69,27 @@ export const COMMANDS = {
   /** "go-back-broadcast-action" */
   BROADCAST_BACK_ACTION: "go-back-broadcast-action",
 };
+
+//MISCELLANEOUS
+export const miscellaneousCommands = {
+  name: "Miscellaneous",
+  commands: [
+    `/start — says hello, checks required environment variables, sends command list.`,
+    `/help — sends command list.`,
+    `/${COMMANDS.INFO} -g? — sends user's or group's (with -g flag) basic information.`,
+    `/${COMMANDS.CHECK} — checks the required environment variables.`,
+  ],
+};
 export const dayCountCommands = {
   name: "Day Count",
   commands: [
     `/${COMMANDS.DC_NEW} -d 1 -s "0 5 * * *" -m "whatever {day_count} you want." — create new day count record for the group.`,
-    `/${COMMANDS.DC_EDIT} -id 1 -d 1 -s "0 5 * * *" -m "whatever {day_count} you want." — update day count with the given id.`,
+    `/${COMMANDS.DC_EDIT} -id 1 -d 1 -s "0 5 * * *" -m "whatever {day_count} you want." — update day count record with the given id.`,
+    `/${COMMANDS.DC_CONTROL} {-id 1 | -a | -g} 123? — update day count records with the given amount.`,
     `/${COMMANDS.DC_DELETE} — remove day count.`,
-    `/${COMMANDS.DC_LIST} - list all day count records of a group.`,
-    `/${COMMANDS.SKIP_NEW} {-id 12 | -a | -g} -d? 1/2/2022 - list all day count records of a group.`,
+    `/${COMMANDS.DC_LIST} -a? - list all day count records of one or all (with -a flag) groups.`,
+    `/${COMMANDS.SKIP_NEW} {-id 12 | -a | -g} -d? "1/2/2022" - create skip schedules to prevent cron jobs from running.`,
+    `/${COMMANDS.SKIP_DELETE} {-id 12 | -a | -g} -d? "1/2/2022" - delete skip schedules to prevent cron jobs from running.`,
   ],
 };
 export const broadcastCommands = {
@@ -113,6 +126,7 @@ export const quoteCommands = {
   ],
 };
 export const COMMAND_GROUPS = [
+  miscellaneousCommands,
   dayCountCommands,
   broadcastCommands,
   readingGroupCommands,

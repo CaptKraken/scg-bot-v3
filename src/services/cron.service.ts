@@ -30,10 +30,15 @@ export const createCronJobs = async () => {
           const skips = await findSkips(dc.id, today);
 
           if (skips.length > 0) {
+            console.info(
+              `[INFO: ${new Date().toLocaleString("km-KH")}] Day count ${
+                dc.id
+              } skipped.`
+            );
             return await deleteManySkips(dc.id, today);
           }
 
-          const data = await increaseDayCount(dc.id);
+          const data = await increaseDayCount(dc.id, 1);
           if (dc.id === Number(process.env.READING_GROUP_DAY_COUNT_ID)) {
             return sendReport();
           }

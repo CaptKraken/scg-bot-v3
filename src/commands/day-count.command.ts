@@ -15,6 +15,9 @@ import {
   createDayCount,
   decreaseDayCount,
   deleteDayCount,
+  increaseAllDayCounts,
+  increaseDayCount,
+  increaseDayCountOfGroup,
   updateDayCount,
 } from "../services/day-count.service";
 import { createGroup, deleteGroup } from "../services/group.service";
@@ -243,8 +246,6 @@ export const skipDayCountCommand = async (ctx: MyContext) => {
 };
 
 export const deleteSkipCommand = async (ctx: MyContext) => {
-  // -a -g -id -d
-
   const data: {
     date?: Date;
     id?: number;
@@ -257,7 +258,6 @@ export const deleteSkipCommand = async (ctx: MyContext) => {
     all: false,
   };
   if (!ctx.cleanedMessage) {
-    // TODO: Update this to use the right command
     const guide = dayCountCommands.commands
       .filter((command) => command.includes(COMMANDS.SKIP_DELETE))
       .join();
@@ -316,5 +316,66 @@ export const deleteSkipCommand = async (ctx: MyContext) => {
   if (data.id) {
     await deleteOneSkip(data.id);
     return sendDisappearingMessage(ctx.chatId, successMsg);
+  }
+};
+
+export const dayCountControlCommand = async (ctx: MyContext) => {
+  const match = ctx.cleanedMessage.match(
+    /(-id\s([0-9]+)\s?(-?[0-9]+)?|-a(\s(-?[0-9]+))?|-g(\s(-?[0-9]+))?)/g
+  );
+  if (!match) return;
+
+  const command = match[0].trim();
+
+  if (command.startsWith("-id")) {
+    const [id, amount] = command
+      .replace(/-id/g, "")
+      .split(" ")
+      .filter((part) => part)
+      .map((part) => Number(part));
+    if (!id) {
+      throw new Error(`Error transforming data`);
+    }
+    if (amount === 0) {
+      return await sendDisappearingMessage(ctx.chatId, `No changed was made.`);
+    }
+    const updated = await increaseDayCount(id, amount ?? -1);
+    return await sendDisappearingMessage(
+      ctx.chatId,
+      `Day count ${id} ${amount > 0 ? "increased" : "decreased"} ${
+        amount ?? -1
+      } to ${updated?.dayCount}.`
+    );
+  }
+  if (command.startsWith("-g")) {
+    const amount = parseInt(command.replace(/-g/g, ""));
+    if (amount === 0) {
+      return await sendDisappearingMessage(ctx.chatId, `No changed was made.`);
+    }
+    const isValidAmount = !isNaN(amount);
+    const updated = await increaseDayCountOfGroup(
+      ctx.chatId,
+      isValidAmount ? amount : -1
+    );
+    return await sendDisappearingMessage(
+      ctx.chatId,
+      `${amount > 0 ? "Increased" : "Decreased"} ${
+        isValidAmount ? amount : -1
+      } for ${updated?.count} day count records.`
+    );
+  }
+  if (command.startsWith("-a")) {
+    const amount = parseInt(command.replace(/-a/g, ""));
+    if (amount === 0) {
+      return await sendDisappearingMessage(ctx.chatId, `No changed was made.`);
+    }
+    const isValidAmount = !isNaN(amount);
+    const updated = await increaseAllDayCounts(isValidAmount ? amount : -1);
+    return await sendDisappearingMessage(
+      ctx.chatId,
+      `${amount > 0 ? "Increased" : "Decreased"} ${
+        isValidAmount ? amount : -1
+      } for ${updated?.count} day count records.`
+    );
   }
 };

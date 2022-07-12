@@ -345,7 +345,8 @@ export const csvToTable = (
   return table.join("\n");
 };
 
-export const removeCommand = (message: string) => {
+export const removeCommand = (message?: string) => {
+  if (!message) return "";
   const trimmedMessage = message.trim();
 
   if (!trimmedMessage) return "";

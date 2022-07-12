@@ -8,15 +8,16 @@ import {
   sendDisappearingMessage,
 } from "../libs/utils";
 import {
+  createOneReader,
   deleteReader,
+  findOneReader,
   isReadingGroup,
   saveReadCount,
   sendReport,
+  updateOneReader,
 } from "../services/reader.service";
 import { COMMANDS } from "../libs/constants";
 import { MyContext } from "../index";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
-import e from "express";
 import { createUser } from "../services/user.service";
 
 export const updateReadCountCommand = async (
@@ -48,17 +49,51 @@ export const updateReadCountCommand = async (
 
     const needsDummy = message.includes("-dd");
     const count = convertKhmerToArabicNumerals(parts[0].replace("#", ""));
-    const user = parts[1];
-    const hasEnoughData = isNumber(count.toString()) && user && messageId;
+    const name = parts[1];
+    const hasEnoughData = isNumber(count.toString()) && name && messageId;
 
-    if (hasEnoughData) {
-      if (needsDummy) {
-        const dummyId = Math.floor(Math.random() * 1000);
-        const dummyUser = await createUser(dummyId, "Dummy User");
-        return await saveReadCount(dummyUser.id, user, count, messageId);
+    if (!hasEnoughData) return;
+    const userData = await createUser(
+      ctx.senderId,
+      `${ctx.from?.first_name ?? ""} + ${ctx.from?.last_name ?? ""}`,
+      true
+    );
+    const hasReaderProfile = Boolean(userData.readerInfo);
+    const readerProfile = await findOneReader({ readerName: name });
+
+    // reader record doesn't exist
+    if (!readerProfile) {
+      // if sender has no reader profile
+      if (!hasReaderProfile) {
+        // create reader with sender id
+        return await createOneReader(ctx.senderId, name, count, messageId);
       }
-      return await saveReadCount(ctx.senderId, user, count, messageId);
+      // if sender has reader profile
+      // generate a dummy account
+      const dummyId = Math.floor(Math.random() * 1000);
+      const dummyUser = await createUser(dummyId, "Dummy User");
+      // create reader profile with dummy
+      return await createOneReader(dummyUser.id, name, count, messageId);
     }
+
+    // reader record doesn't exist
+    const isReaderADummyAccount = readerProfile.accountId <= 1000;
+    const isDummyAccountAndNoReaderProfile =
+      isReaderADummyAccount && !hasReaderProfile;
+    if (isDummyAccountAndNoReaderProfile) {
+      return updateOneReader({
+        accountId: ctx.senderId,
+        readerName: name,
+        readCount: count,
+        lastMessageId: messageId,
+      });
+    }
+    // update read
+    return updateOneReader({
+      readerName: name,
+      readCount: count,
+      lastMessageId: messageId,
+    });
   } catch (error) {
     errorHandler(ctx.chatId, error);
   }
