@@ -1,6 +1,6 @@
 import { Context, Telegraf } from "telegraf";
 import { Update } from "typegram";
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
@@ -27,6 +27,7 @@ import {
   isAdminMiddleware,
 } from "./middlewares/bot.middleware";
 import {
+  dayCountControlCommand,
   deleteSkipCommand,
   listDayCountCommand,
   removeGroupCommand,
@@ -67,12 +68,19 @@ import {
   sendDisappearingMessage,
 } from "./libs/utils";
 import { getTomorrow } from "./libs/time.utils";
+import {
+  decreaseDayCount,
+  increaseAllDayCounts,
+  increaseDayCount,
+  increaseDayCountOfGroup,
+  increaseManyDayCounts,
+} from "./services/day-count.service";
+import { DayCount } from "@prisma/client";
 dotenv.config();
 
 const { BOT_TOKEN, SERVER_URL } = process.env;
 
-// TODO: IMPLIMENT SKIP FUNCTION
-
+// TODO refactor
 export interface MyContext extends Context {
   senderId: number;
   chatId: number;
@@ -103,10 +111,7 @@ bot.command(COMMANDS.READER_LIST, readReportCommand);
 //#region Day Count
 bot.command(COMMANDS.DC_NEW, setGroupCommand);
 bot.command(COMMANDS.DC_EDIT, updateGroupCommand);
-bot.command(COMMANDS.DC_CONTROL, async (ctx) => {
-  // TODO: increase, decrease (1, -1) -id -g -a
-  console.log("msg", ctx.cleanedMessage);
-});
+bot.command(COMMANDS.DC_CONTROL, dayCountControlCommand);
 bot.command(COMMANDS.DC_DELETE, removeGroupCommand);
 bot.command(COMMANDS.DC_LIST, listDayCountCommand);
 bot.command(COMMANDS.SKIP_NEW, skipDayCountCommand);
@@ -150,6 +155,16 @@ export const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
 app.get("/", (req: Request, res: Response) => {
   return res.json({ alive: true, uptime: process.uptime() });
+});
+
+bot.use((ctx: MyContext, next: () => Promise<void>) => {
+  console.log(ctx.chatId);
+  next();
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  console.log(req);
+  next();
 });
 
 const server = app.listen(process.env.PORT || 3000, async () => {

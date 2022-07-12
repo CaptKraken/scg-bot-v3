@@ -117,12 +117,30 @@ export const increaseDayCount = async (id: number, amount: number = 1) => {
 };
 
 export const decreaseDayCount = async (id: number, amount: number = 1) => {
-  await dbClient.dayCount.update({
+  return await dbClient.dayCount.update({
     where: {
       id,
     },
     data: {
       dayCount: { decrement: amount },
+    },
+  });
+};
+export const increaseDayCountOfGroup = async (
+  groupId: number,
+  amount: number = 1
+) => {
+  return await dbClient.dayCount.updateMany({
+    where: { groupId },
+    data: { dayCount: { increment: amount } },
+  });
+};
+export const increaseAllDayCounts = async (amount: number = 1) => {
+  return await dbClient.dayCount.updateMany({
+    data: {
+      dayCount: {
+        increment: amount,
+      },
     },
   });
 };

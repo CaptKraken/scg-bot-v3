@@ -1,8 +1,7 @@
 import { MyContext } from "../index";
-import { COMMANDS, COMMAND_GROUPS } from "../libs/constants";
-import { cleanMessage, errorHandler, isSenderAdmin } from "../libs/utils";
+import { COMMAND_GROUPS } from "../libs/constants";
+import { cleanMessage, errorHandler } from "../libs/utils";
 import dotenv from "dotenv";
-import { time, timeEnd } from "console";
 dotenv.config();
 
 const {
@@ -30,6 +29,7 @@ const isUrlValid = (url: string | undefined, options?: ValidUrlOptions) => {
     return false;
   }
 };
+
 // regex from https://www.regextester.com/108794
 const botTokenRegex = new RegExp(/[0-9]{9}:[a-zA-Z0-9_-]{35}/gm);
 const postgresqlRegex = new RegExp(

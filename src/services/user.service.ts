@@ -46,9 +46,9 @@ export const createUser = async (
       readerInfo: withReaderProfile,
     },
   });
-  if (!user) {
-    throw new Error("Failed to create user.");
-  }
+  // if (!user) {
+  //   throw new Error("Failed to create user.");
+  // }
   return user;
 };
 
