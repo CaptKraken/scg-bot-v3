@@ -14,9 +14,15 @@ import {
 import { MyContext } from "../index";
 import { dbClient } from "../libs";
 
+/**
+ * Sends admin list to the group.
+ */
 export const sendAdminListCommand = async (ctx: MyContext) => {
   try {
     const adminList = await dbClient.person.findMany({
+      where: {
+        role: "ADMIN",
+      },
       orderBy: {
         name: "asc",
       },
@@ -42,7 +48,10 @@ export const sendAdminListCommand = async (ctx: MyContext) => {
   }
 };
 
-export const addGlobalAdminCommand = async (ctx: MyContext) => {
+/**
+ * add user as admin.
+ */
+export const createAdminCommand = async (ctx: MyContext) => {
   try {
     if (!ctx.isAdmin) return;
 
@@ -68,7 +77,10 @@ export const addGlobalAdminCommand = async (ctx: MyContext) => {
   }
 };
 
-export const removeGlobalAdminCommand = async (ctx: MyContext) => {
+/**
+ * delete user as admin.
+ */
+export const deleteAdminCommand = async (ctx: MyContext) => {
   try {
     // @ts-ignore
     const toBeAdmin = ctx.message?.reply_to_message?.from;

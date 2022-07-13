@@ -8,8 +8,8 @@ import { initCronJobs } from "./services/cron.service";
 import { debug } from "util";
 import { COMMANDS, dayCountCommands } from "./libs/constants";
 import {
-  addGlobalAdminCommand,
-  removeGlobalAdminCommand,
+  createAdminCommand,
+  deleteAdminCommand,
   sendAdminListCommand,
 } from "./commands/admin.command";
 import {
@@ -18,9 +18,9 @@ import {
   updateReadCountCommand,
 } from "./commands/read.command";
 import {
-  addQuoteCommand,
-  removeQuoteCommand,
-  viewQuoteCommand,
+  createQuoteCommand,
+  deleteQuoteCommand,
+  sendQuoteListCommand,
 } from "./commands/quote.command";
 import {
   formatMiddleware,
@@ -28,19 +28,19 @@ import {
 } from "./middlewares/bot.middleware";
 import {
   dayCountControlCommand,
-  deleteSkipCommand,
+  deleteSkipDayCountCommand,
   listDayCountCommand,
-  removeGroupCommand,
-  setGroupCommand,
-  skipDayCountCommand,
-  updateGroupCommand,
+  deleteDayCountCommand,
+  createDayCountCommand,
+  createSkipDayCountCommand,
+  updateDayCountCommand,
 } from "./commands/day-count.command";
 import {
-  addGroupBroadcastCommand,
+  createGroupCommand,
   createFolderCommand,
   deleteFolderCommand,
   emitBroadcastCommand,
-  removeGroupBroadcastCommand,
+  deleteGroupCommand,
   renameFolderCommand,
 } from "./commands/broadcast.command";
 import {
@@ -76,6 +76,7 @@ import {
   increaseManyDayCounts,
 } from "./services/day-count.service";
 import { DayCount } from "@prisma/client";
+import axios from "axios";
 dotenv.config();
 
 const { BOT_TOKEN, SERVER_URL } = process.env;
@@ -109,25 +110,25 @@ bot.command(COMMANDS.READER_LIST, readReportCommand);
 //#endregion
 
 //#region Day Count
-bot.command(COMMANDS.DC_NEW, setGroupCommand);
-bot.command(COMMANDS.DC_EDIT, updateGroupCommand);
+bot.command(COMMANDS.DC_NEW, createDayCountCommand);
+bot.command(COMMANDS.DC_EDIT, updateDayCountCommand);
 bot.command(COMMANDS.DC_CONTROL, dayCountControlCommand);
-bot.command(COMMANDS.DC_DELETE, removeGroupCommand);
+bot.command(COMMANDS.DC_DELETE, deleteDayCountCommand);
 bot.command(COMMANDS.DC_LIST, listDayCountCommand);
-bot.command(COMMANDS.SKIP_NEW, skipDayCountCommand);
-bot.command(COMMANDS.SKIP_DELETE, deleteSkipCommand);
+bot.command(COMMANDS.SKIP_NEW, createSkipDayCountCommand);
+bot.command(COMMANDS.SKIP_DELETE, deleteSkipDayCountCommand);
 //#endregion
 
 //#region Admins
 bot.command(COMMANDS.ADMIN_LIST, sendAdminListCommand);
-bot.command(COMMANDS.ADMIN_NEW, addGlobalAdminCommand);
-bot.command(COMMANDS.ADMIN_DELETE, removeGlobalAdminCommand);
+bot.command(COMMANDS.ADMIN_NEW, createAdminCommand);
+bot.command(COMMANDS.ADMIN_DELETE, deleteAdminCommand);
 //#endregion
 
 //#region Quote
-bot.command(COMMANDS.QUOTE_NEW, addQuoteCommand);
-bot.command(COMMANDS.QUOTE_LIST, viewQuoteCommand);
-bot.command(COMMANDS.QUOTE_DELETE, removeQuoteCommand);
+bot.command(COMMANDS.QUOTE_NEW, createQuoteCommand);
+bot.command(COMMANDS.QUOTE_LIST, sendQuoteListCommand);
+bot.command(COMMANDS.QUOTE_DELETE, deleteQuoteCommand);
 //#endregion
 
 //#region Broadcast
@@ -135,9 +136,9 @@ bot.command(COMMANDS.FOLDER_NEW, createFolderCommand);
 bot.command(COMMANDS.FOLDER_EDIT, renameFolderCommand);
 bot.command(COMMANDS.FOLDER_DELETE, deleteFolderCommand);
 bot.action(/\bdelete-folder-action\b/g, deleteFolderAction);
-bot.command(COMMANDS.GROUP_NEW, addGroupBroadcastCommand);
+bot.command(COMMANDS.GROUP_NEW, createGroupCommand);
 bot.action(/\badd-group-broadcast-action\b/g, addGroupToFolderAction);
-bot.command(COMMANDS.GROUP_DELETE, removeGroupBroadcastCommand);
+bot.command(COMMANDS.GROUP_DELETE, deleteGroupCommand);
 bot.action(/\bshow-remove-group-broadcast-action\b/g, listGroupsOfFolderAction);
 bot.action(/\bremove-group-broadcast-action\b/g, deleteGroupFromFolderAction);
 bot.action(/\bgo-back-broadcast-action\b/g, goBackBroadcastAction);
@@ -153,19 +154,19 @@ app.use(cookieParser());
 app.use(bot.webhookCallback(`/bot${BOT_TOKEN}`));
 export const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (_: Request, res: Response) => {
   return res.json({ alive: true, uptime: process.uptime() });
 });
 
-bot.use((ctx: MyContext, next: () => Promise<void>) => {
-  console.log(ctx.chatId);
-  next();
-});
-
-app.use((req: Request, res: Response, next: NextFunction) => {
-  console.log(req);
-  next();
-});
+// keeps the heroku app running
+setInterval(() => {
+  try {
+    axios.get(`${process.env.SERVER_URL}`);
+  } catch (e) {
+    // ts-ignore
+    console.log("[INTERVAL ERROR]:", `Error fetching the thing.`);
+  }
+}, 600000); // every 10 minutes
 
 const server = app.listen(process.env.PORT || 3000, async () => {
   console.log(`[INFO]: App running on port ${process.env.PORT || 3000}`);

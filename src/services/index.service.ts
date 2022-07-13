@@ -10,9 +10,4 @@ export {
   createUser,
   deleteUser,
 } from "./user.service";
-export {
-  findReaders,
-  findOneReader,
-  saveReadCount,
-  deleteReader,
-} from "./reader.service";
+export { findReaders, findOneReader, deleteReader } from "./reader.service";

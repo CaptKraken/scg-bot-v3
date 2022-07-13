@@ -4,10 +4,19 @@ import { sendMessage } from "../libs/utils";
 import { findOneDayCount } from "./day-count.service";
 import { createUser } from "./user.service";
 import dotenv from "dotenv";
+import { Reader } from "@prisma/client";
 dotenv.config();
 
 const { READING_GROUP_ID, SERVER_URL } = process.env;
 
+/**
+ * Creates one reader record
+ * @param accountId telegram user id
+ * @param readerName reader name
+ * @param readCount read count
+ * @param lastMessageId last message id
+ * @returns reader record
+ */
 export const createOneReader = async (
   accountId: number,
   readerName: string,
@@ -24,6 +33,11 @@ export const createOneReader = async (
   });
 };
 
+/**
+ *
+ * @param {Object} payload {readerName, readerCount?=0, lastMessageId?=0, accountId?}
+ * @returns reader record
+ */
 export const updateOneReader = async ({
   readerName,
   readCount = 0,
@@ -31,8 +45,8 @@ export const updateOneReader = async ({
   accountId,
 }: {
   readerName: string;
-  readCount: number;
-  lastMessageId: number;
+  readCount?: number;
+  lastMessageId?: number;
   accountId?: number;
 }) => {
   const payload: {
@@ -56,31 +70,46 @@ export const updateOneReader = async ({
   });
 };
 
-export const isReadingGroup = (groupId: number) =>
+/**
+ * Checks if the given group id is the reading group.
+ * @param {number} groupId telegram chat id
+ * @returns {boolean}
+ */
+export const isReadingGroup = (groupId: number): boolean =>
   Number(READING_GROUP_ID) === groupId;
 
-export const findReaders = async () => {
+/**
+ * Finds all readers records.
+ * @returns a list of reader records.
+ */
+export const findReaders = async (): Promise<Reader[]> => {
   return await dbClient.reader.findMany({
     orderBy: { readCount: "desc" },
   });
 };
 
+/**
+ * Finds one reader record.
+ * @param {number} [accountId=undefined] telegram user id
+ * @param {string} [readerName=undefined] reader name
+ * @returns a reader record or null
+ */
 export const findOneReader = async ({
   accountId,
   readerName,
 }: {
   accountId?: number;
   readerName?: string;
-}) => {
+}): Promise<Reader | null> => {
   const payload = accountId ? { accountId } : { readerName };
-  const reader = await dbClient.reader.findUnique({
+  return await dbClient.reader.findUnique({
     where: payload,
   });
-  // if (!reader) throw new Error(`Reader ${accountId} not found.`);
-
-  return reader;
 };
 
+/**
+ * Sends reader report to the reading group.
+ */
 export const sendReport = async () => {
   try {
     const daycount = await findOneDayCount(
@@ -106,35 +135,12 @@ export const sendReport = async () => {
   }
 };
 
-export const saveReadCount = async (
-  accountId: number,
-  readerName: string,
-  readCount: number,
-  lastMessageId: number
-) => {
-  const reader = await findOneReader({ readerName });
-  const isNewMessage = lastMessageId >= (reader?.lastMessageId ?? 0);
-  const readerProfile = await dbClient.reader.upsert({
-    where: {
-      readerName,
-    },
-    create: {
-      accountId,
-      readCount,
-      readerName,
-      lastMessageId,
-    },
-    update: {
-      readCount: isNewMessage ? readCount : reader?.readCount ?? 0,
-      lastMessageId: isNewMessage ? lastMessageId : reader?.lastMessageId ?? 0,
-    },
-    include: {
-      person: true,
-    },
-  });
-  return readerProfile;
-};
-
+/**
+ *
+ * @param {Object} payload  - data needed for deletion
+ * @param {number} payload.accountId - telegram user id
+ * @param {string} payload.readerName - reader name
+ */
 export const deleteReader = async ({
   accountId,
   readerName,

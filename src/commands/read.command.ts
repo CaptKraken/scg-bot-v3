@@ -1,10 +1,7 @@
-import { Update } from "typegram";
-import { Context } from "telegraf";
 import {
   convertKhmerToArabicNumerals,
   errorHandler,
   isNumber,
-  isSenderAdmin,
   sendDisappearingMessage,
 } from "../libs/utils";
 import {
@@ -12,14 +9,18 @@ import {
   deleteReader,
   findOneReader,
   isReadingGroup,
-  saveReadCount,
   sendReport,
   updateOneReader,
 } from "../services/reader.service";
 import { COMMANDS } from "../libs/constants";
 import { MyContext } from "../index";
-import { createUser } from "../services/user.service";
+import { createUser, deleteUser } from "../services/user.service";
 
+/**
+ * Creates or updates read records.
+ * @param {MyContext} ctx telegraf context
+ * @param {boolean} [isNew=true] is the message new or edited. default=true
+ */
 export const updateReadCountCommand = async (
   ctx: MyContext,
   isNew: boolean = true
@@ -47,15 +48,15 @@ export const updateReadCountCommand = async (
       .split(" ")
       .filter((part: string) => part);
 
-    const needsDummy = message.includes("-dd");
-    const count = convertKhmerToArabicNumerals(parts[0].replace("#", ""));
+    const count = convertKhmerToArabicNumerals(parts[0].replace(/#/g, ""));
     const name = parts[1];
-    const hasEnoughData = isNumber(count.toString()) && name && messageId;
+    const hasEnoughData =
+      isNumber(count.toString()) && Boolean(name) && Boolean(messageId);
 
     if (!hasEnoughData) return;
     const userData = await createUser(
       ctx.senderId,
-      `${ctx.from?.first_name ?? ""} + ${ctx.from?.last_name ?? ""}`,
+      `${ctx.from?.first_name ?? ""} ${ctx.from?.last_name ?? ""}`,
       true
     );
     const hasReaderProfile = Boolean(userData.readerInfo);
@@ -70,8 +71,9 @@ export const updateReadCountCommand = async (
       }
       // if sender has reader profile
       // generate a dummy account
-      const dummyId = Math.floor(Math.random() * 1000);
-      const dummyUser = await createUser(dummyId, "Dummy User");
+      // const dummyId = () => Math.floor(Math.random() * 1000);
+      const dummyId = () => 120;
+      const dummyUser = await createUser(dummyId(), "Dummy User");
       // create reader profile with dummy
       return await createOneReader(dummyUser.id, name, count, messageId);
     }
@@ -81,12 +83,16 @@ export const updateReadCountCommand = async (
     const isDummyAccountAndNoReaderProfile =
       isReaderADummyAccount && !hasReaderProfile;
     if (isDummyAccountAndNoReaderProfile) {
-      return updateOneReader({
+      const dummyAccountId = readerProfile.accountId;
+      // link sender id with reader profile
+      await updateOneReader({
         accountId: ctx.senderId,
         readerName: name,
         readCount: count,
         lastMessageId: messageId,
       });
+      // delete the dummy user
+      return await deleteUser(dummyAccountId);
     }
     // update read
     return updateOneReader({
@@ -99,6 +105,10 @@ export const updateReadCountCommand = async (
   }
 };
 
+/**
+ * Removes one reader
+ * @param {MyContext} ctx
+ */
 export const removeReaderCommand = async (ctx: MyContext) => {
   try {
     const readerName = ctx.cleanedMessage.trim();
@@ -119,6 +129,10 @@ export const removeReaderCommand = async (ctx: MyContext) => {
   }
 };
 
+/**
+ * Sends reading report to the reading group on telegram.
+ * @param {MyContext} ctx
+ */
 export const readReportCommand = async (ctx: MyContext) => {
   try {
     await sendReport();

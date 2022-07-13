@@ -74,6 +74,9 @@ export const checkEnvironmentVariables = () => {
   };
 };
 
+/**
+ * Checks environment variables, says hi, sends help command.
+ */
 export const startCommand = async (ctx: MyContext) => {
   if (!checkEnvironmentVariables().valid) {
     ctx.reply(
@@ -89,6 +92,9 @@ export const startCommand = async (ctx: MyContext) => {
   return helpCommand(ctx);
 };
 
+/**
+ * Checks required evironment variables
+ */
 export const checkCommand = async (ctx: MyContext) => {
   const { valid, invalidEVs } = checkEnvironmentVariables();
 
@@ -116,6 +122,9 @@ export const checkCommand = async (ctx: MyContext) => {
   return ctx.reply(message, { parse_mode: "HTML" });
 };
 
+/**
+ * Sends a list of all commands with usage guide.
+ */
 export const helpCommand = async (ctx: MyContext) => {
   try {
     let commands = "";
@@ -135,6 +144,9 @@ export const helpCommand = async (ctx: MyContext) => {
   }
 };
 
+/**
+ * Sends info of user or group
+ */
 export const infoCommand = async (ctx: MyContext) => {
   if (ctx.cleanedMessage.includes("-g")) {
     const chat = await ctx.getChat();
