@@ -60,7 +60,7 @@ export interface MyContext extends Context {
   cleanedMessage: string;
   cleanedCallback: string;
 }
-// const bot = new Telegraf<MyContext>(BOT_TOKEN as string);
+const bot = new Telegraf<MyContext>(BOT_TOKEN as string);
 
 // bot.use(formatMiddleware);
 // bot.start(startCommand);
@@ -117,11 +117,11 @@ export interface MyContext extends Context {
 // bot.action(/\bemit\b/g, emitBroadcastAction);
 // //#endregion
 
-// bot.telegram.setWebhook(`${SERVER_URL}/bot${BOT_TOKEN}`);
+bot.telegram.setWebhook(`${SERVER_URL}/bot${BOT_TOKEN}`);
 const app = express();
 app.use(bodyParser.json());
 app.use(cookieParser());
-// app.use(bot.webhookCallback(`/bot${BOT_TOKEN}`));
+app.use(bot.webhookCallback(`/bot${BOT_TOKEN}`));
 export const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
 app.get("/", (_: Request, res: Response) => {
