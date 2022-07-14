@@ -92,7 +92,7 @@ export const updateDayCountCommand = async (ctx: MyContext) => {
     if (schedule) {
       restartCronJobs();
     }
-    sendDisappearingMessage(
+    return sendDisappearingMessage(
       ctx.chatId,
       // @ts-ignore
       `[BOT]: Group ${chat.title} has been updated successfully.`
@@ -114,7 +114,10 @@ export const deleteDayCountCommand = async (ctx: MyContext) => {
 
     await deleteDayCount(id);
     restartCronJobs();
-    sendDisappearingMessage(ctx.chatId, `[Success]: Day count record removed.`);
+    return sendDisappearingMessage(
+      ctx.chatId,
+      `[Success]: Day count record removed.`
+    );
   } catch (error) {
     errorHandler(ctx.chatId, error);
   }
