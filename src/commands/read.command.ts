@@ -72,8 +72,7 @@ export const updateReadCountCommand = async (
       }
       // if sender has reader profile
       // generate a dummy account
-      // const dummyId = () => Math.floor(Math.random() * 1000);
-      const dummyId = () => 120;
+      const dummyId = () => Math.floor(Math.random() * 1000);
       const dummyUser = await createUser(dummyId(), "Dummy User");
       // create reader profile with dummy
       return await createOneReader(dummyUser.id, name, count, messageId);
