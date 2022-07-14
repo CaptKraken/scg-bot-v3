@@ -4,50 +4,50 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { debug } from "util";
-import { COMMANDS } from "./libs/index.lib";
 import { initCronJobs } from "./services/index.service";
-import {
-  createAdminCommand,
-  deleteAdminCommand,
-  sendAdminListCommand,
-  readReportCommand,
-  removeReaderCommand,
-  updateReadCountCommand,
-  createQuoteCommand,
-  deleteQuoteCommand,
-  sendQuoteListCommand,
-  deleteSkipDayCountCommand,
-  listDayCountCommand,
-  dayCountControlCommand,
-  deleteDayCountCommand,
-  createDayCountCommand,
-  createSkipDayCountCommand,
-  updateDayCountCommand,
-  createGroupCommand,
-  createFolderCommand,
-  deleteFolderCommand,
-  emitBroadcastCommand,
-  deleteGroupCommand,
-  renameFolderCommand,
-  infoCommand,
-  startCommand,
-  helpCommand,
-  checkCommand,
-} from "./commands/index.command";
+// import { COMMANDS } from "./libs/index.lib";
+// import {
+//   createAdminCommand,
+//   deleteAdminCommand,
+//   sendAdminListCommand,
+//   readReportCommand,
+//   removeReaderCommand,
+//   updateReadCountCommand,
+//   createQuoteCommand,
+//   deleteQuoteCommand,
+//   sendQuoteListCommand,
+//   deleteSkipDayCountCommand,
+//   listDayCountCommand,
+//   dayCountControlCommand,
+//   deleteDayCountCommand,
+//   createDayCountCommand,
+//   createSkipDayCountCommand,
+//   updateDayCountCommand,
+//   createGroupCommand,
+//   createFolderCommand,
+//   deleteFolderCommand,
+//   emitBroadcastCommand,
+//   deleteGroupCommand,
+//   renameFolderCommand,
+//   infoCommand,
+//   startCommand,
+//   helpCommand,
+//   checkCommand,
+// } from "./commands/index.command";
 
-import {
-  formatMiddleware,
-  isAdminMiddleware,
-} from "./middlewares/bot.middleware";
-import {
-  addGroupToFolderAction,
-  cancelAction,
-  deleteFolderAction,
-  emitBroadcastAction,
-  goBackBroadcastAction,
-  deleteGroupFromFolderAction,
-  listGroupsOfFolderAction,
-} from "./actions/index.action";
+// import {
+//   formatMiddleware,
+//   isAdminMiddleware,
+// } from "./middlewares/bot.middleware";
+// import {
+//   addGroupToFolderAction,
+//   cancelAction,
+//   deleteFolderAction,
+//   emitBroadcastAction,
+//   goBackBroadcastAction,
+//   deleteGroupFromFolderAction,
+//   listGroupsOfFolderAction,
+// } from "./actions/index.action";
 dotenv.config();
 
 const { BOT_TOKEN, SERVER_URL } = process.env;
@@ -146,7 +146,7 @@ const server = app.listen(process.env.PORT || 3000, async () => {
   console.log(`[INFO]: App running on port ${process.env.PORT || 3000}`);
   console.log(`************* INIT BOT *************`);
   await initCronJobs();
-  console.log("[BOT]:", bot.telegram.getWebhookInfo());
+  console.log("[BOT]:", await bot.telegram.getWebhookInfo());
   console.log(`************ INIT  DONE ************`);
 });
 
