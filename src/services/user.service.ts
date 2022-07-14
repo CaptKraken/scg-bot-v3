@@ -1,29 +1,43 @@
-import { dbClient } from "../libs";
+import { dbClient } from "../libs/index.lib";
 
+/**
+ * finds all user records.
+ * @param {boolean} [withReaderProfile=false] whether to include the reader profile or not
+ * @returns a list of all user records
+ */
 export const findAllUser = async (withReaderProfile: boolean = false) => {
-  const users = await dbClient.person.findMany({
+  return await dbClient.person.findMany({
     include: {
       readerInfo: withReaderProfile,
     },
   });
-  return users;
 };
 
+/**
+ * finds one user record by id.
+ * @param {number} id user id
+ * @param {boolean} [withReaderProfile=false] whether to include the reader profile or not
+ * @returns one user record or null
+ */
 export const findOneUser = async (
   id: number,
   withReaderProfile: boolean = false
 ) => {
-  const user = await dbClient.person.findUnique({
+  return await dbClient.person.findUnique({
     where: { id },
     include: {
       readerInfo: withReaderProfile,
     },
   });
-
-  if (!user) throw new Error(`User ${id} not found.`);
-  return user;
 };
 
+/**
+ * creates or updates a new use record.
+ * @param {number} id telegram user id
+ * @param {string} name telegram user name
+ * @param {boolean} [withReaderProfile=false] whether to include the reader profile or not
+ * @returns a user record
+ */
 export const createUser = async (
   id: number,
   name: string,
@@ -46,14 +60,16 @@ export const createUser = async (
       readerInfo: withReaderProfile,
     },
   });
-  // if (!user) {
-  //   throw new Error("Failed to create user.");
-  // }
   return user;
 };
 
+/**
+ * deletes a user record.
+ * @param id user id
+ * @returns the deleted user record.
+ */
 export const deleteUser = async (id: number) => {
-  await dbClient.person.delete({
+  return await dbClient.person.delete({
     where: { id },
   });
 };

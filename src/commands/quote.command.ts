@@ -1,14 +1,11 @@
-import { Context } from "telegraf";
-import { Update } from "typegram";
 import { MyContext } from "../index";
-import { dbClient } from "../libs";
-import { COMMANDS } from "../libs/constants";
 import {
+  dbClient,
   csvToTable,
   errorHandler,
   sendDisappearingMessage,
-} from "../libs/utils";
-import { createQuote, deleteQuote } from "../services/quote.service";
+} from "../libs/index.lib";
+import { createQuote, deleteQuote } from "../services/index.service";
 
 /**
  * creates new quote.

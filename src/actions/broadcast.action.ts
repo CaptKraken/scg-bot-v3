@@ -1,20 +1,19 @@
 import { Group } from "@prisma/client";
-import { deleteGroupCommand } from "../commands/broadcast.command";
 import { MyContext } from "../index";
-import { COMMANDS } from "../libs/constants";
 import {
+  COMMANDS,
   cancelKey,
   errorHandler,
   goBackBroadcastKey,
-  removeCommand,
   sendDisappearingMessage,
-} from "../libs/utils";
+} from "../libs/index.lib";
 import {
   findOneFolder,
   addGroupToFolder,
   removeGroupFromFolder,
   deleteFolder,
-} from "../services/folder.service";
+} from "../services/index.service";
+import { deleteGroupCommand } from "../commands/index.command";
 
 /**
  * emit a message to the selected folder.

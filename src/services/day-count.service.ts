@@ -1,6 +1,10 @@
 import cron from "node-cron";
-import { dbClient } from "../libs";
+import { dbClient } from "../libs/index.lib";
 
+/**
+ * Finds all the day count records.
+ * @returns a list of day count records
+ */
 export const findAllDayCounts = async () => {
   return await dbClient.dayCount.findMany({
     orderBy: {
@@ -12,6 +16,11 @@ export const findAllDayCounts = async () => {
   });
 };
 
+/**
+ * Finds one day count record with the given id.
+ * @param {number} id day count record id
+ * @returns
+ */
 export const findOneDayCount = async (id: number) => {
   const dayCount = await dbClient.dayCount.findUnique({
     where: {
@@ -21,8 +30,6 @@ export const findOneDayCount = async (id: number) => {
       group: true,
     },
   });
-
-  // if (!dayCount) throw new Error(`Day count ${id} not found.`);
   return dayCount;
 };
 
@@ -33,15 +40,17 @@ type CreateDayCounter = {
   message?: string;
 };
 
+/**
+ * creates a day count record.
+ * @param {CreateDayCounter} dto
+ * @returns a day count record with group record
+ */
 export const createDayCount = async ({
   groupId,
   dayCount = 0,
   schedule = "0 0 * * *",
   message = "ថ្ងៃទី {day_count}",
 }: CreateDayCounter) => {
-  if (schedule && !cron.validate(schedule)) {
-    throw new Error("Invalid schedule");
-  }
   return await dbClient.dayCount.create({
     data: {
       groupId,
@@ -63,6 +72,11 @@ type UpdateDayCounter = {
   message?: string;
 };
 
+/**
+ * updates day count record.
+ * @param {UpdateDayCounter} dto
+ * @returns a day count record with group record.
+ */
 export const updateDayCount = async ({
   id,
   groupId,
@@ -95,18 +109,12 @@ export const updateDayCount = async ({
   });
 };
 
-// export const increaseDayCount = async (ids: { id: number }[]) => {
-//   if (ids.length <= 0) return;
-//   await dbClient.dayCount.updateMany({
-//     where: {
-//       OR: [...ids],
-//     },
-//     data: {
-//       dayCount: { increment: 1 },
-//     },
-//   });
-// };
-
+/**
+ * increases day count of a day count record.
+ * @param {number} id day count record id
+ * @param {number} [amount=1] amount to increase
+ * @returns day count record
+ */
 export const increaseDayCount = async (id: number, amount: number = 1) => {
   return await dbClient.dayCount.update({
     where: {
@@ -116,6 +124,12 @@ export const increaseDayCount = async (id: number, amount: number = 1) => {
   });
 };
 
+/**
+ * decreases day count of a day count record.
+ * @param {number} id day count record id
+ * @param {number} [amount=1] amount to decrease
+ * @returns day count record
+ */
 export const decreaseDayCount = async (id: number, amount: number = 1) => {
   return await dbClient.dayCount.update({
     where: {
@@ -126,6 +140,13 @@ export const decreaseDayCount = async (id: number, amount: number = 1) => {
     },
   });
 };
+
+/**
+ * increases day count records of a group.
+ * @param {number} groupId group id
+ * @param {number} [amount=1] amount to increase
+ * @returns amount of records updated.
+ */
 export const increaseDayCountOfGroup = async (
   groupId: number,
   amount: number = 1
@@ -135,6 +156,12 @@ export const increaseDayCountOfGroup = async (
     data: { dayCount: { increment: amount } },
   });
 };
+
+/**
+ * increases all day count records.
+ * @param {number} [amount=1] amount to increase
+ * @returns amount of records updated.
+ */
 export const increaseAllDayCounts = async (amount: number = 1) => {
   return await dbClient.dayCount.updateMany({
     data: {
@@ -144,42 +171,12 @@ export const increaseAllDayCounts = async (amount: number = 1) => {
     },
   });
 };
-export const increaseManyDayCounts = async (
-  ids: number[],
-  amount: number = 1
-) => {
-  const dayCountIds = ids.map((id) => {
-    return {
-      id,
-    };
-  });
-  return await dbClient.dayCount.updateMany({
-    where: {
-      OR: dayCountIds,
-    },
-    data: { dayCount: { increment: amount } },
-  });
-};
 
-export const decreaseManyDayCounts = async (
-  ids: number[],
-  amount: number = 1
-) => {
-  const dayCountIds = ids.map((id) => {
-    return {
-      id,
-    };
-  });
-  await dbClient.dayCount.updateMany({
-    where: {
-      OR: dayCountIds,
-    },
-    data: {
-      dayCount: { decrement: amount },
-    },
-  });
-};
-
+/**
+ * deletes a day count record.
+ * @param {number} id
+ * @returns the deleted day count record
+ */
 export const deleteDayCount = async (id: number) => {
-  await dbClient.dayCount.delete({ where: { id } });
+  return await dbClient.dayCount.delete({ where: { id } });
 };

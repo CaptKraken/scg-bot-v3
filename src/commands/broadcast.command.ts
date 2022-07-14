@@ -1,16 +1,15 @@
-import { MyContext } from "..";
-import { COMMANDS } from "../libs/constants";
+import { MyContext } from "../index";
 import {
+  COMMANDS,
   cancelKey,
   errorHandler,
-  removeCommand,
   sendDisappearingMessage,
-} from "../libs/utils";
+} from "../libs/index.lib";
 import {
   createFolder,
   findAllFolders,
   updateFolder,
-} from "../services/folder.service";
+} from "../services/index.service";
 
 /**
  * select a folder to emit the message.

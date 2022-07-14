@@ -1,18 +1,11 @@
-import { Update } from "typegram";
-import { Context } from "telegraf";
+import { createNewAdmin, deleteAdmin } from "../services/index.service";
+import { MyContext } from "../index";
 import {
+  dbClient,
   csvToTable,
   errorHandler,
-  isSenderAdmin,
   sendDisappearingMessage,
-} from "../libs/utils";
-import {
-  ADMIN_NEW,
-  getAdminList,
-  ADMIN_DELETE,
-} from "../services/admin.service";
-import { MyContext } from "../index";
-import { dbClient } from "../libs";
+} from "../libs/index.lib";
 
 /**
  * Sends admin list to the group.
@@ -67,7 +60,7 @@ export const createAdminCommand = async (ctx: MyContext) => {
     const userName =
       firstName && lastName ? `${firstName} ${lastName}` : `${username}`;
 
-    await ADMIN_NEW(userName, userId);
+    await createNewAdmin(userName, userId);
     await sendDisappearingMessage(
       ctx.chatId,
       `[Success]: "${userName}" is added to the database.`
@@ -88,7 +81,7 @@ export const deleteAdminCommand = async (ctx: MyContext) => {
 
     const userId = toBeAdmin.id;
 
-    await ADMIN_DELETE(userId);
+    await deleteAdmin(userId);
     await sendDisappearingMessage(
       ctx.chatId,
       `[Success]: User removed from the database.`

@@ -1,6 +1,11 @@
-import { dbClient } from "../libs";
-import { sendDisappearingMessage } from "../libs/utils";
+import { dbClient } from "../libs/index.lib";
 
+/**
+ * finds all skip records.
+ * @param {number} dayCountId day count id
+ * @param {Date} date skip date
+ * @returns a list of skip records.
+ */
 export const findSkips = async (dayCountId: number, date: Date) => {
   return await dbClient.skipDayCount.findMany({
     where: {
@@ -10,6 +15,12 @@ export const findSkips = async (dayCountId: number, date: Date) => {
   });
 };
 
+/**
+ * creates a skip record.
+ * @param {number} dayCountId day count id
+ * @param {Date} date skip date
+ * @returns the created skip record.
+ */
 export const createSkip = async (dayCountId: number, date?: Date) => {
   const skipRecord = await dbClient.skipDayCount.findFirst({
     where: {
@@ -26,6 +37,11 @@ export const createSkip = async (dayCountId: number, date?: Date) => {
   });
 };
 
+/**
+ * deletes a skip record.
+ * @param {number} id skip id
+ * @returns the deleted skip record.
+ */
 export const deleteOneSkip = async (id: number) => {
   return await dbClient.skipDayCount.delete({
     where: {
@@ -33,6 +49,13 @@ export const deleteOneSkip = async (id: number) => {
     },
   });
 };
+
+/**
+ * deletes many skip records.
+ * @param {number} dayCountId ```optional``` day count id
+ * @param {Date} date ```optional``` date of records
+ * @returns number of records deleted.
+ */
 export const deleteManySkips = async (dayCountId?: number, date?: Date) => {
   const payload: { dayCountId?: number; date?: Date } = {};
   if (dayCountId) {
@@ -46,8 +69,15 @@ export const deleteManySkips = async (dayCountId?: number, date?: Date) => {
     where: payload,
   });
 };
+
+/**
+ * deletes a group's skip records
+ * @param {number} groupId group id
+ * @param {Date} date ```optional``` date of records
+ * @returns number of records deleted.
+ */
 export const deleteGroupSkips = async (groupId: number, date?: Date) => {
-  await dbClient.skipDayCount.deleteMany({
+  return await dbClient.skipDayCount.deleteMany({
     where: {
       dayCount: {
         groupId,
@@ -57,6 +87,12 @@ export const deleteGroupSkips = async (groupId: number, date?: Date) => {
   });
 };
 
+/**
+ * create a skip record for all group's day count.
+ * @param {number} groupId group id
+ * @param {Date} date ```optional``` date of records
+ * @returns number of records created
+ */
 export const createGroupSkips = async (groupId: number, date?: Date) => {
   const groupsDayCountIds = await dbClient.dayCount.findMany({
     where: {
@@ -93,13 +129,18 @@ export const createGroupSkips = async (groupId: number, date?: Date) => {
         );
 
   if (finalPayload.length > 0) {
-    await dbClient.skipDayCount.createMany({
+    return await dbClient.skipDayCount.createMany({
       data: finalPayload,
       skipDuplicates: true,
     });
   }
 };
 
+/**
+ * creates a skip records for all day counts.
+ * @param {Date} date ```optional``` date of records
+ * @returns number of records created
+ */
 export const createGlobalSkips = async (date?: Date) => {
   const dayCountIds = await dbClient.dayCount.findMany({
     select: { id: true },
@@ -131,7 +172,7 @@ export const createGlobalSkips = async (date?: Date) => {
       : payload.filter((p) => ids.some((d) => d.dayCountId !== p.dayCountId));
 
   if (finalPayload.length > 0) {
-    await dbClient.skipDayCount.createMany({
+    return await dbClient.skipDayCount.createMany({
       data: finalPayload,
     });
   }

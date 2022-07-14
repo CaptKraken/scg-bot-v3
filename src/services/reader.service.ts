@@ -1,13 +1,10 @@
-import { renameFolderCommand } from "./../commands/broadcast.command";
-import { dbClient } from "../libs";
-import { sendMessage } from "../libs/utils";
-import { findOneDayCount } from "./day-count.service";
-import { createUser } from "./user.service";
+import { dbClient, sendMessage } from "../libs/index.lib";
+import { findOneDayCount } from "./index.service";
 import dotenv from "dotenv";
 import { Reader } from "@prisma/client";
 dotenv.config();
 
-const { READING_GROUP_ID, SERVER_URL } = process.env;
+const { READING_GROUP_ID } = process.env;
 
 /**
  * Creates one reader record
@@ -34,7 +31,7 @@ export const createOneReader = async (
 };
 
 /**
- *
+ * updates a reader record.
  * @param {Object} payload {readerName, readerCount?=0, lastMessageId?=0, accountId?}
  * @returns reader record
  */
@@ -136,7 +133,7 @@ export const sendReport = async () => {
 };
 
 /**
- *
+ * deletes a reader record.
  * @param {Object} payload  - data needed for deletion
  * @param {number} payload.accountId - telegram user id
  * @param {string} payload.readerName - reader name

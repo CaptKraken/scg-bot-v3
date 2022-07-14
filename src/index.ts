@@ -1,48 +1,44 @@
 import { Context, Telegraf } from "telegraf";
-import { Update } from "typegram";
-import express, { NextFunction, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
-import { initCronJobs } from "./services/cron.service";
 import { debug } from "util";
-import { COMMANDS, dayCountCommands } from "./libs/constants";
+import { COMMANDS } from "./libs/index.lib";
+import { initCronJobs } from "./services/index.service";
 import {
   createAdminCommand,
   deleteAdminCommand,
   sendAdminListCommand,
-} from "./commands/admin.command";
-import {
   readReportCommand,
   removeReaderCommand,
   updateReadCountCommand,
-} from "./commands/read.command";
-import {
   createQuoteCommand,
   deleteQuoteCommand,
   sendQuoteListCommand,
-} from "./commands/quote.command";
-import {
-  formatMiddleware,
-  isAdminMiddleware,
-} from "./middlewares/bot.middleware";
-import {
-  dayCountControlCommand,
   deleteSkipDayCountCommand,
   listDayCountCommand,
+  dayCountControlCommand,
   deleteDayCountCommand,
   createDayCountCommand,
   createSkipDayCountCommand,
   updateDayCountCommand,
-} from "./commands/day-count.command";
-import {
   createGroupCommand,
   createFolderCommand,
   deleteFolderCommand,
   emitBroadcastCommand,
   deleteGroupCommand,
   renameFolderCommand,
-} from "./commands/broadcast.command";
+  infoCommand,
+  startCommand,
+  helpCommand,
+  checkCommand,
+} from "./commands/index.command";
+
+import {
+  formatMiddleware,
+  isAdminMiddleware,
+} from "./middlewares/bot.middleware";
 import {
   addGroupToFolderAction,
   cancelAction,
@@ -51,37 +47,12 @@ import {
   goBackBroadcastAction,
   deleteGroupFromFolderAction,
   listGroupsOfFolderAction,
-} from "./actions/broadcast.action";
-import {
-  infoCommand,
-  startCommand,
-  helpCommand,
-  checkCommand,
-} from "./commands/misc.command";
-import {
-  deleteGroupSkips,
-  deleteManySkips,
-  deleteOneSkip,
-} from "./services/skip-day-count.service";
-import {
-  sendDisappearingErrorMessage,
-  sendDisappearingMessage,
-} from "./libs/utils";
-import { getTomorrow } from "./libs/time.utils";
-import {
-  decreaseDayCount,
-  increaseAllDayCounts,
-  increaseDayCount,
-  increaseDayCountOfGroup,
-  increaseManyDayCounts,
-} from "./services/day-count.service";
-import { DayCount } from "@prisma/client";
+} from "./actions/index.action";
 import axios from "axios";
 dotenv.config();
 
 const { BOT_TOKEN, SERVER_URL } = process.env;
 
-// TODO refactor
 export interface MyContext extends Context {
   senderId: number;
   chatId: number;
@@ -164,7 +135,7 @@ setInterval(() => {
     axios.get(`${process.env.SERVER_URL}`);
   } catch (e) {
     // ts-ignore
-    console.log("[INTERVAL ERROR]:", `Error fetching the thing.`);
+    console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
   }
 }, 600000); // every 10 minutes
 

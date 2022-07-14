@@ -1,6 +1,5 @@
 import { MyContext } from "../index";
-import { COMMAND_GROUPS } from "../libs/constants";
-import { cleanMessage, errorHandler } from "../libs/utils";
+import { COMMAND_GROUPS, cleanMessage, errorHandler } from "../libs/index.lib";
 import dotenv from "dotenv";
 dotenv.config();
 

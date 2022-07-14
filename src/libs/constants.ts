@@ -125,6 +125,10 @@ export const quoteCommands = {
     `/${COMMANDS.QUOTE_DELETE} — remove a quote.`,
   ],
 };
+
+/**
+ * an array of all commands with help.
+ */
 export const COMMAND_GROUPS = [
   miscellaneousCommands,
   dayCountCommands,
