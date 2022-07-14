@@ -121,7 +121,7 @@ bot.telegram.setWebhook(`${SERVER_URL}/bot${BOT_TOKEN}`);
 const app = express();
 app.use(bodyParser.json());
 app.use(cookieParser());
-// app.use(bot.webhookCallback(`/bot${BOT_TOKEN}`));
+app.use(bot.webhookCallback(`/bot${BOT_TOKEN}`));
 export const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
 app.get("/", (_: Request, res: Response) => {
@@ -146,6 +146,7 @@ const server = app.listen(process.env.PORT || 3000, async () => {
   console.log(`[INFO]: App running on port ${process.env.PORT || 3000}`);
   console.log(`************* INIT BOT *************`);
   await initCronJobs();
+  console.log("[BOT]:", bot.telegram.getWebhookInfo());
   console.log(`************ INIT  DONE ************`);
 });
 
