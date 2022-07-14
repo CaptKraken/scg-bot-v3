@@ -11,11 +11,35 @@ import {
   findSkips,
   sendReport,
 } from "./index.service";
+import axios from "axios";
+const axiosClient = axios.create({ baseURL: `${process.env.SERVER_URL}` });
+
+/**
+ * keeps heroku app alive
+ */
+const createKeepAliveJob = () => {
+  cron.schedule(
+    "*/5 * * * *",
+    () => {
+      try {
+        axiosClient.get("/");
+      } catch (e) {
+        // ts-ignore
+        console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
+      }
+    },
+    {
+      scheduled: false,
+      timezone: "Asia/Phnom_Penh",
+    }
+  );
+};
 
 /**
  * creates cron jobs.
  */
 export const createCronJobs = async () => {
+  createKeepAliveJob();
   const all = await dbClient.dayCount
     .findMany({
       select: {
