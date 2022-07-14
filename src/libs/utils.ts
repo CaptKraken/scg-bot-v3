@@ -337,7 +337,11 @@ export const csvToTable = (
       0,
       Array(numOfCol)
         .fill("-")
-        .map((_, i) => "".padStart(spaceForCol[i] + 2, "-")) // 2 for space (table loop)
+        .map((_, i) => {
+          const padLength =
+            i + 1 === numOfCol ? spaceForCol[i] - 5 : spaceForCol[i] + 2;
+          return "".padStart(padLength, "-");
+        }) // 2 for space (table loop)
         .join("|")
     );
   }
