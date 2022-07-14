@@ -1,21 +1,23 @@
 import { Group } from "@prisma/client";
-import { removeGroupBroadcastCommand } from "../commands/broadcast.command";
 import { MyContext } from "../index";
-import { COMMANDS } from "../libs/constants";
 import {
+  COMMANDS,
   cancelKey,
   errorHandler,
   goBackBroadcastKey,
-  removeCommand,
   sendDisappearingMessage,
-} from "../libs/utils";
+} from "../libs/index.lib";
 import {
   findOneFolder,
   addGroupToFolder,
   removeGroupFromFolder,
   deleteFolder,
-} from "../services/folder.service";
+} from "../services/index.service";
+import { deleteGroupCommand } from "../commands/index.command";
 
+/**
+ * emit a message to the selected folder.
+ */
 export const emitBroadcastAction = async (ctx: MyContext) => {
   try {
     ctx.answerCbQuery();
@@ -64,6 +66,9 @@ export const emitBroadcastAction = async (ctx: MyContext) => {
   }
 };
 
+/**
+ * add group to the selected folder.
+ */
 export const addGroupToFolderAction = async (ctx: MyContext) => {
   try {
     ctx.answerCbQuery();
@@ -89,6 +94,9 @@ export const addGroupToFolderAction = async (ctx: MyContext) => {
   }
 };
 
+/**
+ * delete the selected folder.
+ */
 export const deleteFolderAction = async (ctx: MyContext) => {
   try {
     ctx.answerCbQuery();
@@ -107,6 +115,9 @@ export const deleteFolderAction = async (ctx: MyContext) => {
   }
 };
 
+/**
+ * shows group list of the selected folder.
+ */
 export const listGroupsOfFolderAction = async (ctx: MyContext) => {
   try {
     ctx.answerCbQuery();
@@ -157,6 +168,9 @@ export const listGroupsOfFolderAction = async (ctx: MyContext) => {
   }
 };
 
+/**
+ * delete a group from the selected folder.
+ */
 export const deleteGroupFromFolderAction = async (ctx: MyContext) => {
   try {
     ctx.answerCbQuery();
@@ -194,13 +208,19 @@ export const deleteGroupFromFolderAction = async (ctx: MyContext) => {
   }
 };
 
+/**
+ * goes back to delete group command.
+ */
 export const goBackBroadcastAction = async (ctx: MyContext) => {
   await ctx.answerCbQuery();
   await ctx.deleteMessage();
-  await removeGroupBroadcastCommand(ctx);
+  await deleteGroupCommand(ctx);
 };
 
+/**
+ * cancel button.
+ */
 export const cancelAction = async (ctx: MyContext) => {
-  ctx.answerCbQuery();
-  ctx.deleteMessage();
+  await ctx.answerCbQuery();
+  await ctx.deleteMessage();
 };

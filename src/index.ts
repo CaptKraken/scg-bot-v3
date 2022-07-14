@@ -1,48 +1,44 @@
 import { Context, Telegraf } from "telegraf";
-import { Update } from "typegram";
-import express, { NextFunction, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
-import { initCronJobs } from "./services/cron.service";
 import { debug } from "util";
-import { COMMANDS, dayCountCommands } from "./libs/constants";
+import { COMMANDS } from "./libs/index.lib";
+import { initCronJobs } from "./services/index.service";
 import {
-  addGlobalAdminCommand,
-  removeGlobalAdminCommand,
+  createAdminCommand,
+  deleteAdminCommand,
   sendAdminListCommand,
-} from "./commands/admin.command";
-import {
   readReportCommand,
   removeReaderCommand,
   updateReadCountCommand,
-} from "./commands/read.command";
-import {
-  addQuoteCommand,
-  removeQuoteCommand,
-  viewQuoteCommand,
-} from "./commands/quote.command";
+  createQuoteCommand,
+  deleteQuoteCommand,
+  sendQuoteListCommand,
+  deleteSkipDayCountCommand,
+  listDayCountCommand,
+  dayCountControlCommand,
+  deleteDayCountCommand,
+  createDayCountCommand,
+  createSkipDayCountCommand,
+  updateDayCountCommand,
+  createGroupCommand,
+  createFolderCommand,
+  deleteFolderCommand,
+  emitBroadcastCommand,
+  deleteGroupCommand,
+  renameFolderCommand,
+  infoCommand,
+  startCommand,
+  helpCommand,
+  checkCommand,
+} from "./commands/index.command";
+
 import {
   formatMiddleware,
   isAdminMiddleware,
 } from "./middlewares/bot.middleware";
-import {
-  dayCountControlCommand,
-  deleteSkipCommand,
-  listDayCountCommand,
-  removeGroupCommand,
-  setGroupCommand,
-  skipDayCountCommand,
-  updateGroupCommand,
-} from "./commands/day-count.command";
-import {
-  addGroupBroadcastCommand,
-  createFolderCommand,
-  deleteFolderCommand,
-  emitBroadcastCommand,
-  removeGroupBroadcastCommand,
-  renameFolderCommand,
-} from "./commands/broadcast.command";
 import {
   addGroupToFolderAction,
   cancelAction,
@@ -51,36 +47,12 @@ import {
   goBackBroadcastAction,
   deleteGroupFromFolderAction,
   listGroupsOfFolderAction,
-} from "./actions/broadcast.action";
-import {
-  infoCommand,
-  startCommand,
-  helpCommand,
-  checkCommand,
-} from "./commands/misc.command";
-import {
-  deleteGroupSkips,
-  deleteManySkips,
-  deleteOneSkip,
-} from "./services/skip-day-count.service";
-import {
-  sendDisappearingErrorMessage,
-  sendDisappearingMessage,
-} from "./libs/utils";
-import { getTomorrow } from "./libs/time.utils";
-import {
-  decreaseDayCount,
-  increaseAllDayCounts,
-  increaseDayCount,
-  increaseDayCountOfGroup,
-  increaseManyDayCounts,
-} from "./services/day-count.service";
-import { DayCount } from "@prisma/client";
+} from "./actions/index.action";
+import axios from "axios";
 dotenv.config();
 
 const { BOT_TOKEN, SERVER_URL } = process.env;
 
-// TODO refactor
 export interface MyContext extends Context {
   senderId: number;
   chatId: number;
@@ -109,25 +81,25 @@ bot.command(COMMANDS.READER_LIST, readReportCommand);
 //#endregion
 
 //#region Day Count
-bot.command(COMMANDS.DC_NEW, setGroupCommand);
-bot.command(COMMANDS.DC_EDIT, updateGroupCommand);
+bot.command(COMMANDS.DC_NEW, createDayCountCommand);
+bot.command(COMMANDS.DC_EDIT, updateDayCountCommand);
 bot.command(COMMANDS.DC_CONTROL, dayCountControlCommand);
-bot.command(COMMANDS.DC_DELETE, removeGroupCommand);
+bot.command(COMMANDS.DC_DELETE, deleteDayCountCommand);
 bot.command(COMMANDS.DC_LIST, listDayCountCommand);
-bot.command(COMMANDS.SKIP_NEW, skipDayCountCommand);
-bot.command(COMMANDS.SKIP_DELETE, deleteSkipCommand);
+bot.command(COMMANDS.SKIP_NEW, createSkipDayCountCommand);
+bot.command(COMMANDS.SKIP_DELETE, deleteSkipDayCountCommand);
 //#endregion
 
 //#region Admins
 bot.command(COMMANDS.ADMIN_LIST, sendAdminListCommand);
-bot.command(COMMANDS.ADMIN_NEW, addGlobalAdminCommand);
-bot.command(COMMANDS.ADMIN_DELETE, removeGlobalAdminCommand);
+bot.command(COMMANDS.ADMIN_NEW, createAdminCommand);
+bot.command(COMMANDS.ADMIN_DELETE, deleteAdminCommand);
 //#endregion
 
 //#region Quote
-bot.command(COMMANDS.QUOTE_NEW, addQuoteCommand);
-bot.command(COMMANDS.QUOTE_LIST, viewQuoteCommand);
-bot.command(COMMANDS.QUOTE_DELETE, removeQuoteCommand);
+bot.command(COMMANDS.QUOTE_NEW, createQuoteCommand);
+bot.command(COMMANDS.QUOTE_LIST, sendQuoteListCommand);
+bot.command(COMMANDS.QUOTE_DELETE, deleteQuoteCommand);
 //#endregion
 
 //#region Broadcast
@@ -135,9 +107,9 @@ bot.command(COMMANDS.FOLDER_NEW, createFolderCommand);
 bot.command(COMMANDS.FOLDER_EDIT, renameFolderCommand);
 bot.command(COMMANDS.FOLDER_DELETE, deleteFolderCommand);
 bot.action(/\bdelete-folder-action\b/g, deleteFolderAction);
-bot.command(COMMANDS.GROUP_NEW, addGroupBroadcastCommand);
+bot.command(COMMANDS.GROUP_NEW, createGroupCommand);
 bot.action(/\badd-group-broadcast-action\b/g, addGroupToFolderAction);
-bot.command(COMMANDS.GROUP_DELETE, removeGroupBroadcastCommand);
+bot.command(COMMANDS.GROUP_DELETE, deleteGroupCommand);
 bot.action(/\bshow-remove-group-broadcast-action\b/g, listGroupsOfFolderAction);
 bot.action(/\bremove-group-broadcast-action\b/g, deleteGroupFromFolderAction);
 bot.action(/\bgo-back-broadcast-action\b/g, goBackBroadcastAction);
@@ -153,19 +125,19 @@ app.use(cookieParser());
 app.use(bot.webhookCallback(`/bot${BOT_TOKEN}`));
 export const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (_: Request, res: Response) => {
   return res.json({ alive: true, uptime: process.uptime() });
 });
 
-bot.use((ctx: MyContext, next: () => Promise<void>) => {
-  console.log(ctx.chatId);
-  next();
-});
-
-app.use((req: Request, res: Response, next: NextFunction) => {
-  console.log(req);
-  next();
-});
+// keeps the heroku app running
+setInterval(() => {
+  try {
+    axios.get(`${process.env.SERVER_URL}`);
+  } catch (e) {
+    // ts-ignore
+    console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
+  }
+}, 600000); // every 10 minutes
 
 const server = app.listen(process.env.PORT || 3000, async () => {
   console.log(`[INFO]: App running on port ${process.env.PORT || 3000}`);

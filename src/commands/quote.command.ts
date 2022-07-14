@@ -1,16 +1,16 @@
-import { Context } from "telegraf";
-import { Update } from "typegram";
 import { MyContext } from "../index";
-import { dbClient } from "../libs";
-import { COMMANDS } from "../libs/constants";
 import {
+  dbClient,
   csvToTable,
   errorHandler,
   sendDisappearingMessage,
-} from "../libs/utils";
-import { createQuote, deleteQuote } from "../services/quote.service";
+} from "../libs/index.lib";
+import { createQuote, deleteQuote } from "../services/index.service";
 
-export const addQuoteCommand = async (ctx: MyContext) => {
+/**
+ * creates new quote.
+ */
+export const createQuoteCommand = async (ctx: MyContext) => {
   try {
     // @ts-ignore
     const quote: string | undefined = ctx.cleanedMessage.trim();
@@ -22,7 +22,10 @@ export const addQuoteCommand = async (ctx: MyContext) => {
   }
 };
 
-export const viewQuoteCommand = async (ctx: MyContext) => {
+/**
+ * Sends all quotes.
+ */
+export const sendQuoteListCommand = async (ctx: MyContext) => {
   const quotes = await dbClient.quote.findMany({
     orderBy: { id: "asc" },
     select: { id: true, text: true },
@@ -38,7 +41,10 @@ export const viewQuoteCommand = async (ctx: MyContext) => {
   });
 };
 
-export const removeQuoteCommand = async (ctx: MyContext) => {
+/**
+ * deletes a quote.
+ */
+export const deleteQuoteCommand = async (ctx: MyContext) => {
   try {
     const message = ctx.cleanedMessage.trim();
     if (!message) return;

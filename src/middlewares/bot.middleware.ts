@@ -5,6 +5,9 @@ const isGroup = (type?: string) => {
   return type === "group" || type === "supergroup";
 };
 
+/**
+ * Puts isGroup, senderId, chatId, cleanedMessage, cleanedCallback in bot's context
+ */
 export const formatMiddleware = async (
   ctx: MyContext,
   next: () => Promise<void>
@@ -21,6 +24,9 @@ export const formatMiddleware = async (
   return next();
 };
 
+/**
+ * Checks if sender is an admin.
+ */
 export const isAdminMiddleware = async (
   ctx: MyContext,
   next: () => Promise<void>

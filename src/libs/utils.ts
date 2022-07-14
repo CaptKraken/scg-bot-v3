@@ -3,7 +3,7 @@ import { findOneUser } from "../services/user.service";
 export const isSenderAdmin = async (userId: number) => {
   try {
     const user = await findOneUser(userId);
-    return user.role === "ADMIN";
+    return user?.role === "ADMIN";
   } catch (error) {
     return false;
   }
@@ -223,7 +223,7 @@ export const deleteMessage = async (chat_id: number, message_id: number) => {
       return res.data.result;
     }
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };
 

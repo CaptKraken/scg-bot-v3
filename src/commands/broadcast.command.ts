@@ -1,17 +1,19 @@
-import { MyContext } from "..";
-import { COMMANDS } from "../libs/constants";
+import { MyContext } from "../index";
 import {
+  COMMANDS,
   cancelKey,
   errorHandler,
-  removeCommand,
   sendDisappearingMessage,
-} from "../libs/utils";
+} from "../libs/index.lib";
 import {
   createFolder,
   findAllFolders,
   updateFolder,
-} from "../services/folder.service";
+} from "../services/index.service";
 
+/**
+ * select a folder to emit the message.
+ */
 export const emitBroadcastCommand = async (ctx: MyContext) => {
   try {
     if (!ctx.cleanedMessage) throw new Error("no message recieved.");
@@ -54,7 +56,9 @@ export const emitBroadcastCommand = async (ctx: MyContext) => {
     errorHandler(ctx.chatId, error);
   }
 };
-
+/**
+ * creates a new folder.
+ */
 export const createFolderCommand = async (ctx: MyContext) => {
   try {
     const folderName = ctx.cleanedMessage;
@@ -71,6 +75,9 @@ export const createFolderCommand = async (ctx: MyContext) => {
   }
 };
 
+/**
+ * updates a folder's name.
+ */
 export const renameFolderCommand = async (ctx: MyContext) => {
   try {
     if (!ctx.cleanedMessage) {
@@ -116,6 +123,9 @@ export const renameFolderCommand = async (ctx: MyContext) => {
   }
 };
 
+/**
+ * choose folder to delete.
+ */
 export const deleteFolderCommand = async (ctx: MyContext) => {
   try {
     const folders = await findAllFolders();
@@ -156,7 +166,10 @@ export const deleteFolderCommand = async (ctx: MyContext) => {
   }
 };
 
-export const addGroupBroadcastCommand = async (ctx: MyContext) => {
+/**
+ * select a folder to add the current group to.
+ */
+export const createGroupCommand = async (ctx: MyContext) => {
   try {
     if (!ctx.isGroup) {
       throw new Error(`Only available for group.`);
@@ -198,7 +211,10 @@ export const addGroupBroadcastCommand = async (ctx: MyContext) => {
   }
 };
 
-export const removeGroupBroadcastCommand = async (ctx: MyContext) => {
+/**
+ * select a folder to see group to delete.
+ */
+export const deleteGroupCommand = async (ctx: MyContext) => {
   try {
     const folders = await findAllFolders();
     if (folders.length < 1) {

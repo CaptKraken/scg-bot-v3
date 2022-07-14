@@ -1,36 +1,38 @@
 import { Prisma } from "@prisma/client";
 import { MyContext } from "../index";
-import { dbClient } from "../libs";
-import { COMMANDS, COMMAND_GROUPS, dayCountCommands } from "../libs/constants";
-import { getTomorrow, khmerDateToISO } from "../libs/time.utils";
 import {
+  dbClient,
+  COMMANDS,
+  dayCountCommands,
+  getTomorrow,
+  khmerDateToISO,
   csvToTable,
   errorHandler,
   getSetGroupResult,
   sendDisappearingErrorMessage,
   sendDisappearingMessage,
-} from "../libs/utils";
-import { restartCronJobs } from "../services/cron.service";
+} from "../libs/index.lib";
 import {
+  restartCronJobs,
   createDayCount,
-  decreaseDayCount,
   deleteDayCount,
   increaseAllDayCounts,
   increaseDayCount,
   increaseDayCountOfGroup,
   updateDayCount,
-} from "../services/day-count.service";
-import { createGroup, deleteGroup } from "../services/group.service";
-import {
+  createGroup,
   createGlobalSkips,
   createGroupSkips,
   createSkip,
   deleteGroupSkips,
   deleteManySkips,
   deleteOneSkip,
-} from "../services/skip-day-count.service";
+} from "../services/index.service";
 
-export const setGroupCommand = async (ctx: MyContext) => {
+/**
+ * Creates a new day count record.
+ */
+export const createDayCountCommand = async (ctx: MyContext) => {
   try {
     if (!ctx.isGroup) {
       return ctx.reply("DC_NEW command can only be use in groups.");
@@ -60,7 +62,11 @@ export const setGroupCommand = async (ctx: MyContext) => {
     errorHandler(ctx.chatId, e);
   }
 };
-export const updateGroupCommand = async (ctx: MyContext) => {
+
+/**
+ * Updates a day count record.
+ */
+export const updateDayCountCommand = async (ctx: MyContext) => {
   try {
     if (!ctx.isGroup) {
       return ctx.reply("DC_NEW command can only be use in groups.");
@@ -96,7 +102,10 @@ export const updateGroupCommand = async (ctx: MyContext) => {
   }
 };
 
-export const removeGroupCommand = async (ctx: MyContext) => {
+/**
+ * Deletes a day count record.
+ */
+export const deleteDayCountCommand = async (ctx: MyContext) => {
   try {
     if (!ctx.isGroup) return;
 
@@ -111,6 +120,9 @@ export const removeGroupCommand = async (ctx: MyContext) => {
   }
 };
 
+/**
+ * Sends all day count records to the group.
+ */
 export const listDayCountCommand = async (ctx: MyContext) => {
   const showAll = ctx.cleanedMessage.includes("-a");
 
@@ -147,7 +159,10 @@ export const listDayCountCommand = async (ctx: MyContext) => {
   });
 };
 
-export const skipDayCountCommand = async (ctx: MyContext) => {
+/**
+ * Creates a skip day count record.
+ */
+export const createSkipDayCountCommand = async (ctx: MyContext) => {
   const data: {
     date?: Date;
     id?: number;
@@ -245,7 +260,10 @@ export const skipDayCountCommand = async (ctx: MyContext) => {
   }
 };
 
-export const deleteSkipCommand = async (ctx: MyContext) => {
+/**
+ * Deletes a skip day count record.
+ */
+export const deleteSkipDayCountCommand = async (ctx: MyContext) => {
   const data: {
     date?: Date;
     id?: number;
@@ -319,6 +337,9 @@ export const deleteSkipCommand = async (ctx: MyContext) => {
   }
 };
 
+/**
+ * Updates day count of day count records.
+ */
 export const dayCountControlCommand = async (ctx: MyContext) => {
   const match = ctx.cleanedMessage.match(
     /(-id\s([0-9]+)\s?(-?[0-9]+)?|-a(\s(-?[0-9]+))?|-g(\s(-?[0-9]+))?)/g

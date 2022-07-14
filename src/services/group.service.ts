@@ -1,9 +1,18 @@
-import { dbClient } from "../libs";
+import { dbClient } from "../libs/index.lib";
 
+/**
+ * finds all groups.
+ * @returns a list of groups
+ */
 export const findAllGroups = async () => {
   return await dbClient.group.findMany();
 };
 
+/**
+ * finds one group.
+ * @param {number} id group id
+ * @returns a group record
+ */
 export const findOneGroup = async (id: number) => {
   const group = await dbClient.group.findUnique({
     where: {
@@ -15,6 +24,12 @@ export const findOneGroup = async (id: number) => {
   return group;
 };
 
+/**
+ * creates or updates the group record.
+ * @param {number} id group id
+ * @param {string} name group name
+ * @returns group record
+ */
 export const createGroup = async (id: number, name: string) => {
   return await dbClient.group.upsert({
     where: {
@@ -31,6 +46,11 @@ export const createGroup = async (id: number, name: string) => {
   });
 };
 
+/**
+ * deletes a group record.
+ * @param {number} id group id
+ * @returns the deleted group record
+ */
 export const deleteGroup = async (id: number) => {
-  await dbClient.group.delete({ where: { id } });
+  return await dbClient.group.delete({ where: { id } });
 };

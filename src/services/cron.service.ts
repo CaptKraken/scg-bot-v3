@@ -1,11 +1,20 @@
 import cron from "node-cron";
-import { dbClient } from "../libs";
-import { getToday } from "../libs/time.utils";
-import { errorHandler, sendMessage } from "../libs/utils";
-import { findAllDayCounts, increaseDayCount } from "./day-count.service";
-import { sendReport } from "./reader.service";
-import { deleteManySkips, findSkips } from "./skip-day-count.service";
+import {
+  errorHandler,
+  getToday,
+  dbClient,
+  sendMessage,
+} from "../libs/index.lib";
+import {
+  increaseDayCount,
+  deleteManySkips,
+  findSkips,
+  sendReport,
+} from "./index.service";
 
+/**
+ * creates cron jobs.
+ */
 export const createCronJobs = async () => {
   const all = await dbClient.dayCount
     .findMany({
@@ -62,28 +71,42 @@ export const createCronJobs = async () => {
   });
   console.log(`[INFO]: ${cron.getTasks().size} jobs created.`);
 };
+
+/**
+ * starts all cron jobs.
+ */
 export const startCronJobs = () => {
   cron.getTasks().forEach((job) => job.start());
   console.log(`[INFO]: ${cron.getTasks().size} jobs started.`);
 };
 
+/**
+ * stops all cron jobs.
+ */
 export const stopCronJobs = () => {
   cron.getTasks().forEach((job) => job.stop());
   console.log(`[INFO]: ${cron.getTasks().size} jobs stopped.`);
   emptyNodeCronStorage();
 };
 
+/**
+ * init cron jobs
+ */
 export const initCronJobs = async () => {
   await createCronJobs();
   startCronJobs();
 };
 
+/**
+ * restart cron jobs
+ */
 export const restartCronJobs = async () => {
   console.log(`******* Restarting Cron Jobs *******`);
   stopCronJobs();
   await initCronJobs();
   console.log(`********* Restarting Done **********`);
 };
+
 /**
  * specifically for node-cron.js!
  *
