@@ -121,7 +121,7 @@ bot.telegram.setWebhook(`${SERVER_URL}/bot${BOT_TOKEN}`);
 const app = express();
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(bot.webhookCallback(`/bot${BOT_TOKEN}`));
+// app.use(bot.webhookCallback(`/bot${BOT_TOKEN}`));
 export const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
 app.get("/", (_: Request, res: Response) => {
