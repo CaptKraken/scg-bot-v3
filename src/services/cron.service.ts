@@ -117,6 +117,7 @@ export const stopCronJobs = () => {
  * init cron jobs
  */
 export const initCronJobs = async () => {
+  emptyNodeCronStorage();
   await createCronJobs();
   startCronJobs();
 };
@@ -127,6 +128,7 @@ export const initCronJobs = async () => {
 export const restartCronJobs = async () => {
   console.log(`******* Restarting Cron Jobs *******`);
   stopCronJobs();
+  emptyNodeCronStorage();
   await initCronJobs();
   console.log(`********* Restarting Done **********`);
 };
