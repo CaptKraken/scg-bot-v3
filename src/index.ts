@@ -146,7 +146,7 @@ const server = app.listen(process.env.PORT || 3000, async () => {
   console.log(`[INFO]: App running on port ${process.env.PORT || 3000}`);
   console.log(`************* INIT BOT *************`);
   await initCronJobs();
-  console.log("[BOT]:", await app.routes);
+  console.log("[BOT]:", await app._router);
   console.log(`************ INIT  DONE ************`);
 });
 
