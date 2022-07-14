@@ -114,7 +114,7 @@ export const deleteDayCountCommand = async (ctx: MyContext) => {
 
     await deleteDayCount(id);
     restartCronJobs();
-    sendDisappearingMessage(ctx.chatId, `[Success]: Group removed.`);
+    sendDisappearingMessage(ctx.chatId, `[Success]: Day count record removed.`);
   } catch (error) {
     errorHandler(ctx.chatId, error);
   }
