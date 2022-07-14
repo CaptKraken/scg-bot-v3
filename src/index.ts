@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { debug } from "util";
 import { initCronJobs } from "./services/index.service";
+import axios from "axios";
 // import { COMMANDS } from "./libs/index.lib";
 // import {
 //   createAdminCommand,
@@ -130,23 +131,30 @@ app.get("/", (_: Request, res: Response) => {
 
 // // keeps the heroku app running
 setInterval(() => {
+  try {
+    axios.get("/");
+  } catch (e) {
+    // ts-ignore
+    console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
+  }
+}, 5 * 60 * 1000); // every 10 minutes
+setInterval(() => {
   const used = process.memoryUsage().heapUsed / 1024 / 1024;
   console.log(`The script uses approximately ${used} MB`);
   console.log(process.memoryUsage());
 
-  //   try {
-  //     axiosClient.get("/");
-  //   } catch (e) {
-  //     // ts-ignore
-  //     console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
-  //   }
-}, 5000); // every 10 minutes
+  try {
+    axios.get("/");
+  } catch (e) {
+    // ts-ignore
+    console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
+  }
+}, 10 * 1000); // every 10 minutes
 
 const server = app.listen(process.env.PORT || 3000, async () => {
   console.log(`[INFO]: App running on port ${process.env.PORT || 3000}`);
   console.log(`************* INIT BOT *************`);
-  await initCronJobs();
-  console.log("[BOT]:", await app._router);
+  // await initCronJobs();
   console.log(`************ INIT  DONE ************`);
 });
 
