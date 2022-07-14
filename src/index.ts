@@ -48,10 +48,8 @@ import {
   deleteGroupFromFolderAction,
   listGroupsOfFolderAction,
 } from "./actions/index.action";
-import axios from "axios";
-dotenv.config();
 
-const axiosClient = axios.create({ baseURL: `${process.env.SERVER_URL}` });
+dotenv.config();
 
 const { BOT_TOKEN, SERVER_URL } = process.env;
 
@@ -131,15 +129,15 @@ app.get("/", (_: Request, res: Response) => {
   return res.json({ alive: true, uptime: process.uptime() });
 });
 
-// keeps the heroku app running
-setInterval(() => {
-  try {
-    axiosClient.get("/");
-  } catch (e) {
-    // ts-ignore
-    console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
-  }
-}, 600000); // every 10 minutes
+// // keeps the heroku app running
+// setInterval(() => {
+//   try {
+//     axiosClient.get("/");
+//   } catch (e) {
+//     // ts-ignore
+//     console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
+//   }
+// }, 600000); // every 10 minutes
 
 const server = app.listen(process.env.PORT || 3000, async () => {
   console.log(`[INFO]: App running on port ${process.env.PORT || 3000}`);
