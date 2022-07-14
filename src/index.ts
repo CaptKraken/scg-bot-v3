@@ -132,7 +132,7 @@ app.get("/", (_: Request, res: Response) => {
 // // keeps the heroku app running
 setInterval(() => {
   try {
-    axios.get("/");
+    axios.get(`${SERVER_URL}`);
   } catch (e) {
     // ts-ignore
     console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
@@ -142,13 +142,6 @@ setInterval(() => {
   const used = process.memoryUsage().heapUsed / 1024 / 1024;
   console.log(`The script uses approximately ${used} MB`);
   console.log(process.memoryUsage());
-
-  try {
-    axios.get("/");
-  } catch (e) {
-    // ts-ignore
-    console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
-  }
 }, 10 * 1000); // every 10 minutes
 
 const server = app.listen(process.env.PORT || 3000, async () => {
