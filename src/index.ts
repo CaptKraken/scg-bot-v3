@@ -51,6 +51,8 @@ import {
 import axios from "axios";
 dotenv.config();
 
+const axiosClient = axios.create({ baseURL: `${process.env.SERVER_URL}` });
+
 const { BOT_TOKEN, SERVER_URL } = process.env;
 
 export interface MyContext extends Context {
@@ -132,7 +134,7 @@ app.get("/", (_: Request, res: Response) => {
 // keeps the heroku app running
 setInterval(() => {
   try {
-    axios.get(`${process.env.SERVER_URL}`);
+    axiosClient.get("/");
   } catch (e) {
     // ts-ignore
     console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
