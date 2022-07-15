@@ -88,5 +88,7 @@ export const createCronJobs = async () => {
     await generateJob(dc.schedule, dc.id, dc.groupId);
   });
   all = [];
-  console.log(`[INFO]: ${scheduler.scheduledJobs} jobs created.`);
+  console.log(
+    `[INFO]: ${JSON.stringify(scheduler.scheduledJobs)} jobs created.`
+  );
 };
