@@ -4,8 +4,6 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { debug } from "util";
-import { restartAllJobs } from "./services/index.service";
-import axios from "axios";
 import { COMMANDS } from "./libs/index.lib";
 import {
   createAdminCommand,
@@ -65,7 +63,8 @@ export interface MyContext extends Context {
   cleanedCallback: string;
 }
 const bot = new Telegraf<MyContext>(BOT_TOKEN as string);
-
+// TODO: ADD CRON-VALIDATOR AND USE IT IN SCHEDULE SERVICE
+// https://www.npmjs.com/package/cron-validator
 bot.use(formatMiddleware);
 bot.start(startCommand);
 bot.help(helpCommand);

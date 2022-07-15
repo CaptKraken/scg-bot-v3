@@ -1,4 +1,3 @@
-import cron from "node-cron";
 import { dbClient } from "../libs/index.lib";
 
 /**
@@ -84,9 +83,9 @@ export const updateDayCount = async ({
   schedule,
   message,
 }: UpdateDayCounter) => {
-  if (schedule && !cron.validate(schedule)) {
-    throw new Error("Invalid schedule");
-  }
+  // if (schedule && !cron.validate(schedule)) {
+  //   throw new Error("Invalid schedule");
+  // }
   const oldData = await findOneDayCount(id);
 
   if (!oldData) {
