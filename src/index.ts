@@ -143,11 +143,11 @@ setInterval(() => {
     console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
   }
 }, 5 * 60 * 1000); // every 10 minutes
-setInterval(() => {
-  const used = process.memoryUsage().heapUsed / 1024 / 1024;
-  console.log(`The script uses approximately ${used} MB`);
-  console.log(process.memoryUsage());
-}, 10 * 1000); // every 10 minutes
+// setInterval(() => {
+//   const used = process.memoryUsage().heapUsed / 1024 / 1024;
+//   console.log(`The script uses approximately ${used.toFixed(2)} MB`);
+//   console.log(process.memoryUsage());
+// }, 10 * 1000); // every 10 minutes
 
 const server = app.listen(process.env.PORT || 3000, async () => {
   console.log(`[INFO]: App running on port ${process.env.PORT || 3000}`);

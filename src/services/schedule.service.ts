@@ -65,12 +65,35 @@ const generateJob = async (
     }
   });
 };
-
+const inMb = (n: number) => {
+  return (n / 1024 / 1024).toFixed(2) + " MB";
+};
 /**
  * creates cron jobs.
  */
 export const createCronJobs = async () => {
   createKeepAliveJob();
+  scheduler.scheduleJob("RESOURCES-USAGE", "*/10 * * * * *", () => {
+    const used = process.memoryUsage().heapUsed / 1024 / 1024;
+    console.log(`The script uses approximately ${used.toFixed(2)} MB`);
+    // const { rss, heapTotal, heapUsed, external, arrayBuffers } =
+    //   ;
+    const usage: {
+      rss: number;
+      heapTotal: number;
+      heapUsed: number;
+      external: number;
+      arrayBuffers: number;
+    } = process.memoryUsage();
+    let msg = "";
+    Object.keys(usage).map((key) => {
+      // @ts-ignore
+      msg += key + " = " + inMb(Number(usage[`${key}`]));
+    });
+    console.log(msg);
+
+    // console.log(`${rss / 102}`);
+  });
   let all = await dbClient.dayCount.findMany({
     select: {
       id: true,
