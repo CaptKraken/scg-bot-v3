@@ -35,12 +35,56 @@ const createKeepAliveJob = () => {
   );
 };
 
+const generateJob = async (
+  schedule: string,
+  scheduleId: number,
+  groupId: number
+) => {
+  cron.schedule(
+    `${schedule}`,
+    async () => {
+      try {
+        const today = getToday();
+        const skips = await findSkips(scheduleId, today);
+
+        if (skips.length > 0) {
+          console.info(
+            `[INFO: ${new Date().toLocaleString(
+              "km-KH"
+            )}] Day count ${scheduleId} skipped.`
+          );
+          return await deleteManySkips(scheduleId, today);
+        }
+
+        const data = await increaseDayCount(scheduleId, 1);
+        if (scheduleId === Number(process.env.READING_GROUP_DAY_COUNT_ID)) {
+          return sendReport();
+        }
+
+        const uncleanedMessage = data.message;
+        const message = `${uncleanedMessage?.replace(
+          /\{day_count}/g,
+          `${data.dayCount}`
+        )}`;
+
+        sendMessage(data.groupId, message);
+      } catch (error) {
+        errorHandler(groupId, error);
+      }
+    },
+    {
+      scheduled: false,
+      timezone: "Asia/Phnom_Penh",
+    }
+  );
+};
+
 /**
  * creates cron jobs.
  */
 export const createCronJobs = async () => {
   createKeepAliveJob();
-  const all = await dbClient.dayCount
+  let all = await dbClient.dayCount
     .findMany({
       select: {
         id: true,
@@ -55,44 +99,9 @@ export const createCronJobs = async () => {
     });
 
   all.forEach(async (dc) => {
-    cron.schedule(
-      `${dc.schedule}`,
-      async () => {
-        try {
-          const today = getToday();
-          const skips = await findSkips(dc.id, today);
-
-          if (skips.length > 0) {
-            console.info(
-              `[INFO: ${new Date().toLocaleString("km-KH")}] Day count ${
-                dc.id
-              } skipped.`
-            );
-            return await deleteManySkips(dc.id, today);
-          }
-
-          const data = await increaseDayCount(dc.id, 1);
-          if (dc.id === Number(process.env.READING_GROUP_DAY_COUNT_ID)) {
-            return sendReport();
-          }
-
-          const uncleanedMessage = data.message;
-          const message = `${uncleanedMessage?.replace(
-            /\{day_count}/g,
-            `${data.dayCount}`
-          )}`;
-
-          sendMessage(data.groupId, message);
-        } catch (error) {
-          errorHandler(dc.groupId, error);
-        }
-      },
-      {
-        scheduled: false,
-        timezone: "Asia/Phnom_Penh",
-      }
-    );
+    await generateJob(dc.schedule, dc.id, dc.groupId);
   });
+  all = [];
   console.log(`[INFO]: ${cron.getTasks().size} jobs created.`);
 };
 

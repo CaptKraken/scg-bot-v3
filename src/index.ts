@@ -49,6 +49,8 @@ import {
   deleteGroupFromFolderAction,
   listGroupsOfFolderAction,
 } from "./actions/index.action";
+import heapdump from "heapdump";
+
 dotenv.config();
 
 const { BOT_TOKEN, SERVER_URL } = process.env;
@@ -129,6 +131,8 @@ app.get("/", (_: Request, res: Response) => {
   return res.json({ alive: true, uptime: process.uptime() });
 });
 
+// TODO: check cron job for memory leak
+
 // // keeps the heroku app running
 setInterval(() => {
   try {
@@ -147,10 +151,12 @@ setInterval(() => {
 const server = app.listen(process.env.PORT || 3000, async () => {
   console.log(`[INFO]: App running on port ${process.env.PORT || 3000}`);
   console.log(`************* INIT BOT *************`);
-  // await initCronJobs();
+  await initCronJobs();
   console.log(`************ INIT  DONE ************`);
 });
-
+// heapdump.writeSnapshot(function (err, filename) {
+//   console.log("dump written to", filename);
+// });
 process.on("SIGTERM", () => {
   debug("SIGTERM signal received: closing HTTP server");
   server.close(() => {
