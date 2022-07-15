@@ -34,36 +34,42 @@ const generateJob = async (
   scheduleId: number,
   groupId: number
 ) => {
-  scheduler.scheduleJob(`${scheduleId}`, `${schedule}`, async () => {
-    try {
-      const today = getToday();
-      const skips = await findSkips(scheduleId, today);
+  scheduler.scheduleJob(
+    `dc-${scheduleId}`,
+    { rule: schedule, tz: "Asia/Bangkok" },
+    (date) => {
+      async () => {
+        try {
+          const today = getToday();
+          const skips = await findSkips(scheduleId, today);
 
-      if (skips.length > 0) {
-        console.info(
-          `[INFO: ${new Date().toLocaleString(
-            "km-KH"
-          )}] Day count ${scheduleId} skipped.`
-        );
-        return await deleteManySkips(scheduleId, today);
-      }
+          if (skips.length > 0) {
+            console.info(
+              `[INFO: ${new Date().toLocaleString(
+                "km-KH"
+              )}] Day count ${scheduleId} skipped.`
+            );
+            return await deleteManySkips(scheduleId, today);
+          }
 
-      const data = await increaseDayCount(scheduleId, 1);
-      if (scheduleId === Number(process.env.READING_GROUP_DAY_COUNT_ID)) {
-        return sendReport();
-      }
+          const data = await increaseDayCount(scheduleId, 1);
+          if (scheduleId === Number(process.env.READING_GROUP_DAY_COUNT_ID)) {
+            return sendReport();
+          }
 
-      const uncleanedMessage = data.message;
-      const message = `${uncleanedMessage?.replace(
-        /\{day_count}/g,
-        `${data.dayCount}`
-      )}`;
+          const uncleanedMessage = data.message;
+          const message = `${uncleanedMessage?.replace(
+            /\{day_count}/g,
+            `${data.dayCount}`
+          )}`;
 
-      sendMessage(data.groupId, message);
-    } catch (error) {
-      errorHandler(groupId, error);
+          sendMessage(data.groupId, message);
+        } catch (error) {
+          errorHandler(groupId, error);
+        }
+      };
     }
-  });
+  );
 };
 const inMb = (n: number) => {
   return (n / 1024 / 1024).toFixed(2) + " MB";
@@ -97,14 +103,6 @@ export const createCronJobs = async () => {
   //         // console.log(`${rss / 102}`);
   //       }
   // })
-
-  scheduler.scheduleJob(
-    "Bangkok",
-    { rule: "0 23 14 * * *", tz: "Asia/Bangkok" },
-    (date) => {
-      console.log("BANGKOK:", date);
-    }
-  );
 
   scheduler.scheduleJob("RESOURCES-USAGE", "*/10 * * * * *", () => {
     const usage: {
