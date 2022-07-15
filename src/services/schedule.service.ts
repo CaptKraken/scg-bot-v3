@@ -81,53 +81,38 @@ const inMb = (n: number) => {
  */
 export const createCronJobs = async () => {
   createKeepAliveJob();
-  // scheduler.scheduleJob('what', {
-  //     rule: '*/10 * * * * *', tz: 'Asia/Bangkok',() => {
-  //         const usage: {
-  //           rss: number;
-  //           heapTotal: number;
-  //           heapUsed: number;
-  //           external: number;
-  //           arrayBuffers: number;
-  //         } = process.memoryUsage();
-  //         console.log(`The script uses approximately ${inMb(usage.heapUsed)}`);
-  //         // const { rss, heapTotal, heapUsed, external, arrayBuffers } =
-  //         //   ;
 
-  //         let msg = "==========\n";
-  //         Object.keys(usage).map((key) => {
-  //           // @ts-ignore
-  //           msg += key + " = " + inMb(Number(usage[`${key}`])) + "\n";
-  //         });
-  //         msg += "==========";
-  //         console.log(msg);
+  scheduler.scheduleJob(
+    "RESOURCE USAGE",
+    { rule: "*/10 * * * * *", tz: "Asia/Bangkok" },
+    (date) => {
+      const usage: {
+        rss: number;
+        heapTotal: number;
+        heapUsed: number;
+        external: number;
+        arrayBuffers: number;
+      } = process.memoryUsage();
+      console.log(
+        `${date.toUTCString()}The script uses approximately ${inMb(
+          usage.heapUsed
+        )}`
+      );
+      // const { rss, heapTotal, heapUsed, external, arrayBuffers } =
+      //   ;
 
-  //         // console.log(`${rss / 102}`);
-  //       }
-  // })
+      let msg = "==========\n";
+      Object.keys(usage).map((key) => {
+        // @ts-ignore
+        msg += key + " = " + inMb(Number(usage[`${key}`])) + "\n";
+      });
+      msg += "==========";
+      console.log(msg);
 
-  scheduler.scheduleJob("RESOURCES-USAGE", "*/10 * * * * *", () => {
-    const usage: {
-      rss: number;
-      heapTotal: number;
-      heapUsed: number;
-      external: number;
-      arrayBuffers: number;
-    } = process.memoryUsage();
-    console.log(`The script uses approximately ${inMb(usage.heapUsed)}`);
-    // const { rss, heapTotal, heapUsed, external, arrayBuffers } =
-    //   ;
+      // console.log(`${rss / 102}`);
+    }
+  );
 
-    let msg = "==========\n";
-    Object.keys(usage).map((key) => {
-      // @ts-ignore
-      msg += key + " = " + inMb(Number(usage[`${key}`])) + "\n";
-    });
-    msg += "==========";
-    console.log(msg);
-
-    // console.log(`${rss / 102}`);
-  });
   let all = await dbClient.dayCount.findMany({
     select: {
       id: true,
