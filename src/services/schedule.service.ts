@@ -94,7 +94,7 @@ export const createCronJobs = async () => {
         arrayBuffers: number;
       } = process.memoryUsage();
       console.log(
-        `${date.toUTCString()}The script uses approximately ${inMb(
+        `${date.toLocaleString()}\nThe script uses approximately ${inMb(
           usage.heapUsed
         )}`
       );
