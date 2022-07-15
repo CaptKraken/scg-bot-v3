@@ -151,7 +151,7 @@ setInterval(() => {
 const server = app.listen(process.env.PORT || 3000, async () => {
   console.log(`[INFO]: App running on port ${process.env.PORT || 3000}`);
   console.log(`************* INIT BOT *************`);
-  await initCronJobs();
+  // await initCronJobs();
   console.log(`************ INIT  DONE ************`);
 });
 // heapdump.writeSnapshot(function (err, filename) {
