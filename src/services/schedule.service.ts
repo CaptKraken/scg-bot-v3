@@ -99,15 +99,8 @@ export const createCronJobs = async () => {
   // })
 
   scheduler.scheduleJob(
-    "Phnom Penh",
-    { rule: "*/15 * * * * *", tz: "Asia/PhnomPenh" },
-    (date) => {
-      console.log("PHNOM PENH:", date);
-    }
-  );
-  scheduler.scheduleJob(
     "Bangkok",
-    { rule: "*/15 * * * * *", tz: "Asia/Bangkok" },
+    { rule: "0 23 14 * * *", tz: "Asia/Bangkok" },
     (date) => {
       console.log("BANGKOK:", date);
     }
