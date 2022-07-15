@@ -74,10 +74,6 @@ const inMb = (n: number) => {
 export const createCronJobs = async () => {
   createKeepAliveJob();
   scheduler.scheduleJob("RESOURCES-USAGE", "*/10 * * * * *", () => {
-    const used = process.memoryUsage().heapUsed / 1024 / 1024;
-    console.log(`The script uses approximately ${used.toFixed(2)} MB`);
-    // const { rss, heapTotal, heapUsed, external, arrayBuffers } =
-    //   ;
     const usage: {
       rss: number;
       heapTotal: number;
@@ -85,11 +81,16 @@ export const createCronJobs = async () => {
       external: number;
       arrayBuffers: number;
     } = process.memoryUsage();
-    let msg = "";
+    console.log(`The script uses approximately ${inMb(usage.heapUsed)}`);
+    // const { rss, heapTotal, heapUsed, external, arrayBuffers } =
+    //   ;
+
+    let msg = "==========\n";
     Object.keys(usage).map((key) => {
       // @ts-ignore
-      msg += key + " = " + inMb(Number(usage[`${key}`]));
+      msg += key + " = " + inMb(Number(usage[`${key}`])) + "\n";
     });
+    msg += "==========";
     console.log(msg);
 
     // console.log(`${rss / 102}`);
