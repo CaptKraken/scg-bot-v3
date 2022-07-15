@@ -37,39 +37,37 @@ const generateJob = async (
   scheduler.scheduleJob(
     `dc-${scheduleId}`,
     { rule: schedule, tz: "Asia/Bangkok" },
-    (date) => {
+    async () => {
       console.log("dc-", scheduleId, schedule);
 
-      async () => {
-        try {
-          const today = getToday();
-          const skips = await findSkips(scheduleId, today);
+      try {
+        const today = getToday();
+        const skips = await findSkips(scheduleId, today);
 
-          if (skips.length > 0) {
-            console.info(
-              `[INFO: ${new Date().toLocaleString(
-                "km-KH"
-              )}] Day count ${scheduleId} skipped.`
-            );
-            return await deleteManySkips(scheduleId, today);
-          }
-
-          const data = await increaseDayCount(scheduleId, 1);
-          if (scheduleId === Number(process.env.READING_GROUP_DAY_COUNT_ID)) {
-            return sendReport();
-          }
-
-          const uncleanedMessage = data.message;
-          const message = `${uncleanedMessage?.replace(
-            /\{day_count}/g,
-            `${data.dayCount}`
-          )}`;
-
-          sendMessage(data.groupId, message);
-        } catch (error) {
-          errorHandler(groupId, error);
+        if (skips.length > 0) {
+          console.info(
+            `[INFO: ${new Date().toLocaleString(
+              "km-KH"
+            )}] Day count ${scheduleId} skipped.`
+          );
+          return await deleteManySkips(scheduleId, today);
         }
-      };
+
+        const data = await increaseDayCount(scheduleId, 1);
+        if (scheduleId === Number(process.env.READING_GROUP_DAY_COUNT_ID)) {
+          return sendReport();
+        }
+
+        const uncleanedMessage = data.message;
+        const message = `${uncleanedMessage?.replace(
+          /\{day_count}/g,
+          `${data.dayCount}`
+        )}`;
+
+        sendMessage(data.groupId, message);
+      } catch (error) {
+        errorHandler(groupId, error);
+      }
     }
   );
 };
