@@ -73,6 +73,46 @@ const inMb = (n: number) => {
  */
 export const createCronJobs = async () => {
   createKeepAliveJob();
+  // scheduler.scheduleJob('what', {
+  //     rule: '*/10 * * * * *', tz: 'Asia/Bangkok',() => {
+  //         const usage: {
+  //           rss: number;
+  //           heapTotal: number;
+  //           heapUsed: number;
+  //           external: number;
+  //           arrayBuffers: number;
+  //         } = process.memoryUsage();
+  //         console.log(`The script uses approximately ${inMb(usage.heapUsed)}`);
+  //         // const { rss, heapTotal, heapUsed, external, arrayBuffers } =
+  //         //   ;
+
+  //         let msg = "==========\n";
+  //         Object.keys(usage).map((key) => {
+  //           // @ts-ignore
+  //           msg += key + " = " + inMb(Number(usage[`${key}`])) + "\n";
+  //         });
+  //         msg += "==========";
+  //         console.log(msg);
+
+  //         // console.log(`${rss / 102}`);
+  //       }
+  // })
+
+  scheduler.scheduleJob(
+    "Phnom Penh",
+    { rule: "*/15 * * * * *", tz: "Asia/PhnomPenh" },
+    (date) => {
+      console.log("PHNOM PENH:", date);
+    }
+  );
+  scheduler.scheduleJob(
+    "Bangkok",
+    { rule: "*/15 * * * * *", tz: "Asia/Bangkok" },
+    (date) => {
+      console.log("BANGKOK:", date);
+    }
+  );
+
   scheduler.scheduleJob("RESOURCES-USAGE", "*/10 * * * * *", () => {
     const usage: {
       rss: number;
