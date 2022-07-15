@@ -4,8 +4,9 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { debug } from "util";
+import { restartAllJobs } from "./services/index.service";
+import axios from "axios";
 import { COMMANDS } from "./libs/index.lib";
-import { initCronJobs } from "./services/index.service";
 import {
   createAdminCommand,
   deleteAdminCommand,
@@ -48,6 +49,8 @@ import {
   deleteGroupFromFolderAction,
   listGroupsOfFolderAction,
 } from "./actions/index.action";
+import heapdump from "heapdump";
+import { createCronJobs } from "./services/schedule.service";
 
 dotenv.config();
 
@@ -129,20 +132,10 @@ app.get("/", (_: Request, res: Response) => {
   return res.json({ alive: true, uptime: process.uptime() });
 });
 
-// // keeps the heroku app running
-// setInterval(() => {
-//   try {
-//     axiosClient.get("/");
-//   } catch (e) {
-//     // ts-ignore
-//     console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
-//   }
-// }, 600000); // every 10 minutes
-
 const server = app.listen(process.env.PORT || 3000, async () => {
   console.log(`[INFO]: App running on port ${process.env.PORT || 3000}`);
   console.log(`************* INIT BOT *************`);
-  await initCronJobs();
+  await createCronJobs();
   console.log(`************ INIT  DONE ************`);
 });
 
