@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { debug } from "util";
-import { initCronJobs } from "./services/index.service";
+import { restartAllJobs } from "./services/index.service";
 import axios from "axios";
 import { COMMANDS } from "./libs/index.lib";
 import {
@@ -135,14 +135,14 @@ app.get("/", (_: Request, res: Response) => {
 // TODO: check cron job for memory leak
 
 // // keeps the heroku app running
-setInterval(() => {
-  try {
-    axios.get(`${SERVER_URL}`);
-  } catch (e) {
-    // ts-ignore
-    console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
-  }
-}, 5 * 60 * 1000); // every 10 minutes
+// setInterval(() => {
+//   try {
+//     axios.get(`${SERVER_URL}`);
+//   } catch (e) {
+//     // ts-ignore
+//     console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
+//   }
+// }, 5 * 60 * 1000); // every 10 minutes
 // setInterval(() => {
 //   const used = process.memoryUsage().heapUsed / 1024 / 1024;
 //   console.log(`The script uses approximately ${used.toFixed(2)} MB`);

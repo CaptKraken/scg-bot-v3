@@ -38,8 +38,6 @@ const generateJob = async (
     `dc-${scheduleId}`,
     { rule: schedule, tz: "Asia/Bangkok" },
     async () => {
-      console.log("dc-", scheduleId, schedule);
-
       try {
         const today = getToday();
         const skips = await findSkips(scheduleId, today);
@@ -74,12 +72,8 @@ const generateJob = async (
 const inMb = (n: number) => {
   return (n / 1024 / 1024).toFixed(2) + " MB";
 };
-/**
- * creates cron jobs.
- */
-export const createCronJobs = async () => {
-  createKeepAliveJob();
 
+const memoryUsageJob = () => {
   scheduler.scheduleJob(
     "RESOURCE USAGE",
     { rule: "*/10 * * * * *", tz: "Asia/Bangkok" },
@@ -110,6 +104,13 @@ export const createCronJobs = async () => {
       // console.log(`${rss / 102}`);
     }
   );
+};
+
+/**
+ * creates cron jobs.
+ */
+export const createCronJobs = async () => {
+  createKeepAliveJob();
 
   let all = await dbClient.dayCount.findMany({
     select: {
@@ -129,4 +130,15 @@ export const createCronJobs = async () => {
   });
   all = [];
   console.log(`[INFO]: ${Object.keys(scheduler.scheduledJobs)} jobs created.`);
+};
+
+const stopAllJob = async () => {
+  await scheduler.gracefulShutdown();
+};
+
+export const restartAllJobs = async () => {
+  console.log(`******* Restarting Cron Jobs *******`);
+  await stopAllJob();
+  await createCronJobs();
+  console.log(`********* Restarting Done **********`);
 };

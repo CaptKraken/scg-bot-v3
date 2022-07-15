@@ -13,7 +13,7 @@ import {
   sendDisappearingMessage,
 } from "../libs/index.lib";
 import {
-  restartCronJobs,
+  restartAllJobs,
   createDayCount,
   deleteDayCount,
   increaseAllDayCounts,
@@ -52,7 +52,7 @@ export const createDayCountCommand = async (ctx: MyContext) => {
       message,
     });
 
-    restartCronJobs();
+    restartAllJobs();
     sendDisappearingMessage(
       ctx.chatId,
       // @ts-ignore
@@ -90,7 +90,7 @@ export const updateDayCountCommand = async (ctx: MyContext) => {
     });
 
     if (schedule) {
-      restartCronJobs();
+      restartAllJobs();
     }
     return sendDisappearingMessage(
       ctx.chatId,
@@ -113,7 +113,7 @@ export const deleteDayCountCommand = async (ctx: MyContext) => {
     if (!id || isNaN(id)) throw new Error("Did not recieved id.");
 
     await deleteDayCount(id);
-    restartCronJobs();
+    restartAllJobs();
     return sendDisappearingMessage(
       ctx.chatId,
       `[Success]: Day count record removed.`
