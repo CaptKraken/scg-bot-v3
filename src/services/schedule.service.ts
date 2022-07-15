@@ -38,6 +38,8 @@ const generateJob = async (
     `dc-${scheduleId}`,
     { rule: schedule, tz: "Asia/Bangkok" },
     (date) => {
+      console.log("dc-", scheduleId, schedule);
+
       async () => {
         try {
           const today = getToday();
