@@ -5,8 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "npx tsc",
-    "start": "TZ=Asia/Bangkok node dist/index.js",
-    "dev": "TZ=Asia/Bangkok DEBUG=express* concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\""
+    "start": "node dist/index.js",
+    "dev": "DEBUG=express* concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\""
   },
   "repository": {
     "type": "git",
