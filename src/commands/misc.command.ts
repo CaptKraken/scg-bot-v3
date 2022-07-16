@@ -32,7 +32,7 @@ const isUrlValid = (url: string | undefined, options?: ValidUrlOptions) => {
 // regex from https://www.regextester.com/108794
 const botTokenRegex = new RegExp(/[0-9]{9}:[a-zA-Z0-9_-]{35}/gm);
 const postgresqlRegex = new RegExp(
-  /postgresql:\/\/(?:(?:[^:]+):(?:[^@]+)?@)?(?:(?:(?:[^\/]+)|(?:\/.+.sock?),?)+)(?:\/([^\/\.\ "*<>:\|\?]*))?(?:\?(?:(.+=.+)&?)+)*/
+  /postgres:\/\/(?:(?:[^:]+):(?:[^@]+)?@)?(?:(?:(?:[^\/]+)|(?:\/.+.sock?),?)+)(?:\/([^\/\.\ "*<>:\|\?]*))?(?:\?(?:(.+=.+)&?)+)*/
 );
 
 const isUrlConnectionStringValid = (connectionString: string | undefined) => {
