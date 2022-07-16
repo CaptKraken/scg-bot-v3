@@ -20,7 +20,7 @@ const axiosClient = axios.create({ baseURL: `${process.env.SERVER_URL}` });
  * keeps heroku app alive
  */
 const createKeepAliveJob = () => {
-  scheduler.scheduleJob("keep-alive", "*/5 * * * *", () => {
+  scheduler.scheduleJob("keep-alive", "*/20 * * * *", () => {
     try {
       axiosClient.get("/");
     } catch (e) {
@@ -126,7 +126,9 @@ export const createCronJobs = async () => {
   all.forEach(async (dc) => {
     await generateJob(dc.schedule, dc.id, dc.groupId);
   });
-  console.log(`[INFO]: ${Object.keys(scheduler.scheduledJobs)} jobs created.`);
+  console.log(
+    `[INFO]: ${Object.keys(scheduler.scheduledJobs).length} jobs created.`
+  );
 };
 
 /**
