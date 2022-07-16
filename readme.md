@@ -15,15 +15,15 @@ this bot is used to manage the company's groups.
 1.  Connect your heroku app to your fork
 2.  Setup evironment variables (see [.env.example](/.env.example))
 3.  Send /mybots to Bot Father -> select bot.
-    3.1. `BOT_USERNAME`, @[your_bot_user name]
-    3.2. `BOT_TOKEN`, choose API Token
+    1. `BOT_USERNAME`, @[your_bot_user name]
+    2. `BOT_TOKEN`, choose API Token
     ![alt text](./bot-settings.png "Title")
 4.  Deploy migration
-    4.1. Get to your app's dashboard
-    4.2. Click `More` button
-    4.3. Click `Run Console`
-    4.4. Type `bash` -> click `Run`
-    4.5. Type `npx prisma migrate deploy` -> press `Enter`
+    1. Get to your app's dashboard
+    2. Click `More` button
+    3. Click `Run Console`
+    4. Type `bash` -> click `Run`
+    5. Type `npx prisma migrate deploy` -> press `Enter`
 5.  To get `READING_GROUP_ID`, send `/info -g` while in the reading group
 6.  Create a day count record with `/newdc`, while in the reading group then set up `READING_GROUP_DAY_COUNT_ID`
 7.  To create a user record, send `#1 {your name}` to the reading group.
