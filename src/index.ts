@@ -5,7 +5,6 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { debug } from "util";
 import { COMMANDS } from "./libs/index.lib";
-import { initCronJobs } from "./services/index.service";
 import {
   createAdminCommand,
   deleteAdminCommand,
@@ -34,7 +33,6 @@ import {
   helpCommand,
   checkCommand,
 } from "./commands/index.command";
-
 import {
   formatMiddleware,
   isAdminMiddleware,
@@ -48,13 +46,11 @@ import {
   deleteGroupFromFolderAction,
   listGroupsOfFolderAction,
 } from "./actions/index.action";
-import axios from "axios";
+import { createCronJobs } from "./services/index.service";
+
 dotenv.config();
 
-const axiosClient = axios.create({ baseURL: `${process.env.SERVER_URL}` });
-
 const { BOT_TOKEN, SERVER_URL } = process.env;
-
 export interface MyContext extends Context {
   senderId: number;
   chatId: number;
@@ -63,6 +59,10 @@ export interface MyContext extends Context {
   cleanedMessage: string;
   cleanedCallback: string;
 }
+
+/**
+ * telegraf bot instance.
+ */
 const bot = new Telegraf<MyContext>(BOT_TOKEN as string);
 
 bot.use(formatMiddleware);
@@ -131,20 +131,10 @@ app.get("/", (_: Request, res: Response) => {
   return res.json({ alive: true, uptime: process.uptime() });
 });
 
-// keeps the heroku app running
-setInterval(() => {
-  try {
-    axiosClient.get("/");
-  } catch (e) {
-    // ts-ignore
-    console.log("[KEEP ALIVE ERROR]:", `Error fetching the thing.`);
-  }
-}, 600000); // every 10 minutes
-
 const server = app.listen(process.env.PORT || 3000, async () => {
   console.log(`[INFO]: App running on port ${process.env.PORT || 3000}`);
   console.log(`************* INIT BOT *************`);
-  await initCronJobs();
+  await createCronJobs();
   console.log(`************ INIT  DONE ************`);
 });
 
