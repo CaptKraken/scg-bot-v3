@@ -1,4 +1,4 @@
-#SCG TELEGRAM BOT
+# SCG TELEGRAM BOT
 this bot is used to manage the company's groups.
 
 ### What you'll need
