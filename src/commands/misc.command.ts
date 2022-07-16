@@ -7,7 +7,7 @@ const {
   SERVER_URL,
   BOT_TOKEN,
   BOT_USERNAME,
-  CONNECTION_STRING,
+  DATABASE_URL,
   READING_GROUP_ID,
   READING_GROUP_DAY_COUNT_ID,
 } = process.env;
@@ -52,7 +52,7 @@ export const checkEnvironmentVariables = () => {
     isServerUrlValid: isUrlValid(SERVER_URL, { isSecure: true }),
     isBotTokenValid: isTelegramBotTokenValid(BOT_TOKEN),
     botUsernameExists: Boolean(BOT_USERNAME),
-    isConnectionStringValid: isUrlConnectionStringValid(CONNECTION_STRING),
+    isConnectionStringValid: isUrlConnectionStringValid(DATABASE_URL),
     botReadingGroupIdExists: !isNaN(Number(READING_GROUP_ID)),
     botReadingDayCountIdExists: !isNaN(Number(READING_GROUP_DAY_COUNT_ID)),
   };
@@ -109,7 +109,7 @@ export const checkCommand = async (ctx: MyContext) => {
     isServerUrlValid: "SERVER_URL",
     isBotTokenValid: "BOT_TOKEN",
     botUsernameExists: "BOT_USERNAME",
-    isConnectionStringValid: "CONNECTION_STRING",
+    isConnectionStringValid: "DATABASE_URL",
     botReadingGroupIdExists: "READING_GROUP_ID",
     botReadingDayCountIdExists: "READING_GROUP_DAY_COUNT_ID",
   };
