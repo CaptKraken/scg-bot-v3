@@ -1,4 +1,5 @@
 import { findOneUser } from "../services/user.service";
+import { isValidCron } from "cron-validator";
 
 export const isSenderAdmin = async (userId: number) => {
   try {
@@ -374,4 +375,9 @@ export const removeCommand = (message?: string) => {
   });
 
   return result;
+};
+
+export const validateCron = (expression: string) => {
+  const hasSeconds = expression.split(" ").length === 6;
+  return isValidCron(expression, { seconds: hasSeconds });
 };

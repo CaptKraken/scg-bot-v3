@@ -11,6 +11,7 @@ import {
   getSetGroupResult,
   sendDisappearingErrorMessage,
   sendDisappearingMessage,
+  validateCron,
 } from "../libs/index.lib";
 import {
   restartAllJobs,
@@ -42,6 +43,13 @@ export const createDayCountCommand = async (ctx: MyContext) => {
     const { message, dayCount, schedule } = getSetGroupResult(
       ctx.cleanedMessage
     );
+
+    if (schedule && !validateCron(schedule)) {
+      await sendDisappearingMessage(
+        ctx.chatId,
+        `[Note]: The schedule you provided was not valid.`
+      );
+    }
 
     // @ts-ignore
     await createGroup(ctx.chatId, chat.title);
@@ -78,6 +86,13 @@ export const updateDayCountCommand = async (ctx: MyContext) => {
     );
 
     if (!id) throw new Error("No id recieved. use flag -id to give id.");
+
+    if (schedule && !validateCron(schedule)) {
+      await sendDisappearingMessage(
+        ctx.chatId,
+        `[Note]: The schedule you provided was not valid.`
+      );
+    }
 
     // @ts-ignore
     await createGroup(ctx.chatId, chat.title);

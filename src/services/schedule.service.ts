@@ -4,6 +4,7 @@ import {
   errorHandler,
   getToday,
   sendMessage,
+  validateCron,
 } from "../libs/index.lib";
 import {
   deleteManySkips,
@@ -90,8 +91,6 @@ const memoryUsageJob = () => {
           usage.heapUsed
         )}`
       );
-      // const { rss, heapTotal, heapUsed, external, arrayBuffers } =
-      //   ;
 
       let msg = "==========\n";
       Object.keys(usage).map((key) => {
@@ -100,8 +99,6 @@ const memoryUsageJob = () => {
       });
       msg += "==========";
       console.log(msg);
-
-      // console.log(`${rss / 102}`);
     }
   );
 };
@@ -112,30 +109,36 @@ const memoryUsageJob = () => {
 export const createCronJobs = async () => {
   createKeepAliveJob();
 
-  let all = await dbClient.dayCount.findMany({
-    select: {
-      id: true,
-      groupId: true,
-      schedule: true,
-    },
-  });
-  // .then((dayCounts) => {
-  //   return dayCounts.filter((dayCount) =>
-  //     cron.validate(`${dayCount?.schedule}`)
-  //   );
-  // });
+  let all = await dbClient.dayCount
+    .findMany({
+      select: {
+        id: true,
+        groupId: true,
+        schedule: true,
+      },
+    })
+    .then((dayCounts) => {
+      return dayCounts.filter((dayCount) =>
+        validateCron(`${dayCount?.schedule}`)
+      );
+    });
 
   all.forEach(async (dc) => {
     await generateJob(dc.schedule, dc.id, dc.groupId);
   });
-  all = [];
   console.log(`[INFO]: ${Object.keys(scheduler.scheduledJobs)} jobs created.`);
 };
 
+/**
+ * stops cron jobs.
+ */
 const stopAllJob = async () => {
   await scheduler.gracefulShutdown();
 };
 
+/**
+ * restart cron jobs.
+ */
 export const restartAllJobs = async () => {
   console.log(`******* Restarting Cron Jobs *******`);
   await stopAllJob();

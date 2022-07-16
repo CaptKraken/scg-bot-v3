@@ -33,7 +33,6 @@ import {
   helpCommand,
   checkCommand,
 } from "./commands/index.command";
-
 import {
   formatMiddleware,
   isAdminMiddleware,
@@ -47,13 +46,11 @@ import {
   deleteGroupFromFolderAction,
   listGroupsOfFolderAction,
 } from "./actions/index.action";
-import heapdump from "heapdump";
-import { createCronJobs } from "./services/schedule.service";
+import { createCronJobs } from "./services/index.service";
 
 dotenv.config();
 
 const { BOT_TOKEN, SERVER_URL } = process.env;
-
 export interface MyContext extends Context {
   senderId: number;
   chatId: number;
@@ -62,9 +59,12 @@ export interface MyContext extends Context {
   cleanedMessage: string;
   cleanedCallback: string;
 }
+
+/**
+ * telegraf bot instance.
+ */
 const bot = new Telegraf<MyContext>(BOT_TOKEN as string);
-// TODO: ADD CRON-VALIDATOR AND USE IT IN SCHEDULE SERVICE
-// https://www.npmjs.com/package/cron-validator
+
 bot.use(formatMiddleware);
 bot.start(startCommand);
 bot.help(helpCommand);
