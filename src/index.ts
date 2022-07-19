@@ -131,6 +131,8 @@ app.get("/", (_: Request, res: Response) => {
   return res.json({ alive: true, uptime: process.uptime() });
 });
 
+// can it push
+
 const server = app.listen(process.env.PORT || 3000, async () => {
   console.log(`[INFO]: App running on port ${process.env.PORT || 3000}`);
   console.log(`************* INIT BOT *************`);
