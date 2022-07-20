@@ -119,7 +119,7 @@ bot.action(/\bcancel\b/g, cancelAction);
 bot.command(COMMANDS.EMIT, emitBroadcastCommand);
 bot.action(/\bemit\b/g, emitBroadcastAction);
 //#endregion
-
+// TODO: copy changes from the old folder
 bot.telegram.setWebhook(`${SERVER_URL}/bot${BOT_TOKEN}`);
 const app = express();
 app.use(bodyParser.json());
