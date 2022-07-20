@@ -52,7 +52,7 @@ export const createDayCount = async ({
 }: CreateDayCounter) => {
   return await dbClient.dayCount.create({
     data: {
-      groupId,
+      groupId: Number(groupId),
       dayCount,
       schedule,
       message,
@@ -93,7 +93,7 @@ export const updateDayCount = async ({
       id,
     },
     data: {
-      groupId: groupId ?? oldData.groupId,
+      groupId: groupId ? Number(groupId) : oldData.groupId,
       dayCount: dayCount ?? oldData.dayCount,
       schedule: schedule ?? oldData.schedule,
       message: message ?? oldData.message,
@@ -147,7 +147,7 @@ export const increaseDayCountOfGroup = async (
   amount: number = 1
 ) => {
   return await dbClient.dayCount.updateMany({
-    where: { groupId },
+    where: { groupId: Number(groupId) },
     data: { dayCount: { increment: amount } },
   });
 };

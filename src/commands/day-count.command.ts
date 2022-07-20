@@ -51,6 +51,8 @@ export const createDayCountCommand = async (ctx: MyContext) => {
       );
     }
 
+    console.log("create day count command", chat.id, ctx.chatId);
+
     // @ts-ignore
     await createGroup(ctx.chatId, chat.title);
     await createDayCount({
@@ -148,7 +150,7 @@ export const listDayCountCommand = async (ctx: MyContext) => {
     where: showAll
       ? {}
       : {
-          groupId: ctx.chatId,
+          groupId: Number(ctx.chatId),
         },
     orderBy: [
       {
