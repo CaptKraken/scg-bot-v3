@@ -43,7 +43,7 @@ export const findOneFolder = async ({ id, name }: NameOrIdDto) => {
  */
 export const createFolder = async (name: string) => {
   return await dbClient.folder.create({
-    data: { name },
+    data: { name: name.trim() },
   });
 };
 
@@ -97,7 +97,7 @@ export const addGroupToFolder = async (
   groupName: string
 ) => {
   return await dbClient.folder.update({
-    where: { name: folderName },
+    where: { name: folderName.trim() },
     data: {
       groups: {
         connectOrCreate: {
