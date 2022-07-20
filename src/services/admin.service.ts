@@ -52,6 +52,7 @@ export const createNewAdmin = async (name: string, id: number) => {
     },
     update: {
       name,
+      role: "ADMIN",
     },
   });
 };
