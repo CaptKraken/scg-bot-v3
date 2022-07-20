@@ -122,7 +122,10 @@ bot.command(COMMANDS.EMIT, emitBroadcastCommand);
 bot.action(/\bemit\b/g, emitBroadcastAction);
 //#endregion
 
-bot.telegram.setWebhook(`${SERVER_URL}/bot${BOT_TOKEN}`);
+bot.telegram
+  .setWebhook(`${SERVER_URL}/bot${BOT_TOKEN}`)
+  .catch((e) => console.log("error", e));
+
 const app = express();
 app.use(bodyParser.json());
 app.use(cookieParser());

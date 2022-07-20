@@ -56,7 +56,7 @@ export const emitBroadcastAction = async (ctx: MyContext) => {
     const groups: Group[] = folder.groups;
 
     groups.forEach(({ id }, i) => {
-      ctx.telegram.sendMessage(id, message);
+      ctx.telegram.sendMessage(Number(id), message);
       if (i === groups.length - 1) {
         ctx.reply("Broadcast completed.");
       }
@@ -81,8 +81,11 @@ export const addGroupToFolderAction = async (ctx: MyContext) => {
       throw new Error(`Folder not found.`);
     }
     const chat = await ctx.getChat();
+
     // @ts-ignore
-    await addGroupToFolder(folderName, chat.id, chat.title);
+    await addGroupToFolder(folderName, chat.id, chat.title).catch((e) => {
+      throw e;
+    });
 
     await sendDisappearingMessage(
       ctx.chatId,

@@ -38,7 +38,7 @@ model Reader {
 }
 
 model Group {
-  id              Int        @id
+  id              BigInt        @id
   name            String     @db.VarChar(255)
   dayCount        DayCount[]
   folders         Folder[]
@@ -49,7 +49,7 @@ model Group {
 
 model DayCount {
   id              Int        @id @default(autoincrement())
-  groupId         Int
+  groupId         BigInt
   group           Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
   dayCount        Int        @default(0)
   schedule        String     @db.VarChar(255) @default("0 0 * * *") 

@@ -148,7 +148,7 @@ export const listDayCountCommand = async (ctx: MyContext) => {
     where: showAll
       ? {}
       : {
-          groupId: ctx.chatId,
+          groupId: Number(ctx.chatId),
         },
     orderBy: [
       {

@@ -80,7 +80,7 @@ export const deleteGroupSkips = async (groupId: number, date?: Date) => {
   return await dbClient.skipDayCount.deleteMany({
     where: {
       dayCount: {
-        groupId,
+        groupId: Number(groupId),
       },
       date,
     },
@@ -96,7 +96,7 @@ export const deleteGroupSkips = async (groupId: number, date?: Date) => {
 export const createGroupSkips = async (groupId: number, date?: Date) => {
   const groupsDayCountIds = await dbClient.dayCount.findMany({
     where: {
-      groupId,
+      groupId: Number(groupId),
     },
     select: { id: true },
   });
@@ -111,7 +111,7 @@ export const createGroupSkips = async (groupId: number, date?: Date) => {
   const skipRecords = await dbClient.skipDayCount.findMany({
     where: {
       dayCount: {
-        groupId,
+        groupId: Number(groupId),
       },
       date,
     },
