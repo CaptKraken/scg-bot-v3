@@ -81,7 +81,6 @@ export const addGroupToFolderAction = async (ctx: MyContext) => {
       throw new Error(`Folder not found.`);
     }
     const chat = await ctx.getChat();
-    console.log(chat.id, ctx.chatId);
 
     // @ts-ignore
     await addGroupToFolder(folderName, chat.id, chat.title).catch((e) => {

@@ -51,8 +51,6 @@ export const createDayCountCommand = async (ctx: MyContext) => {
       );
     }
 
-    console.log("create day count command", chat.id, ctx.chatId);
-
     // @ts-ignore
     await createGroup(ctx.chatId, chat.title);
     await createDayCount({

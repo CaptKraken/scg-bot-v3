@@ -31,8 +31,6 @@ export const findOneGroup = async (id: number) => {
  * @returns group record
  */
 export const createGroup = async (id: number, name: string) => {
-  console.log("create group", id, name);
-
   return await dbClient.group.upsert({
     where: {
       id,
