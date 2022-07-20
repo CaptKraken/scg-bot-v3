@@ -80,7 +80,7 @@ const generateJob = async (
           .replace(/\$quote/g, quote ? quote.text : "")
           .replace(/\\\\n/g, "\n");
 
-        sendMessage(data.groupId, message);
+        sendMessage(Number(data.groupId), message);
       } catch (error) {
         errorHandler(groupId, error);
       }
@@ -148,7 +148,7 @@ export const createCronJobs = async () => {
       });
 
     all.forEach(async (dc) => {
-      await generateJob(dc.schedule, dc.id, dc.groupId);
+      await generateJob(dc.schedule, dc.id, Number(dc.groupId));
     });
 
     console.log(
