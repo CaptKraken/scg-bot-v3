@@ -33,6 +33,7 @@ export {
 export {
   sendQuoteListCommand,
   createQuoteCommand,
+  createManyQuotesCommand,
   deleteQuoteCommand,
 } from "./quote.command";
 

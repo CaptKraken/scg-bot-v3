@@ -13,5 +13,6 @@ export {
   isNumber,
   sendMessage,
   validateCron,
+  getRandomInt,
 } from "./utils";
 export { getTomorrow, khmerDateToISO, getToday } from "./time.utils";
