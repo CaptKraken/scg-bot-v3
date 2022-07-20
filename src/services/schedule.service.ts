@@ -8,12 +8,15 @@ import {
 } from "../libs/index.lib";
 import {
   deleteManySkips,
+  findARandomQuote,
   findSkips,
   increaseDayCount,
+  increaseQuoteUseCount,
   sendReport,
 } from "./index.service";
 
 import axios from "axios";
+import { Quote } from "@prisma/client";
 const axiosClient = axios.create({ baseURL: `${process.env.SERVER_URL}` });
 
 /**
@@ -57,11 +60,25 @@ const generateJob = async (
           return sendReport();
         }
 
+        const needsQuote = data.message.includes("$quote");
+        let quote: Quote | null = null;
+        if (needsQuote) {
+          quote = await findARandomQuote()
+            .then(async (quote) => {
+              if (!quote) return null;
+              return await increaseQuoteUseCount(quote.id);
+            })
+            .catch((e) => {
+              console.log(e);
+              return null;
+            });
+        }
+
         const uncleanedMessage = data.message;
-        const message = `${uncleanedMessage?.replace(
-          /\{day_count}/g,
-          `${data.dayCount}`
-        )}`;
+        const message = uncleanedMessage
+          ?.replace(/\$count/g, data.dayCount.toString())
+          .replace(/\$quote/g, quote ? quote.text : "")
+          .replace(/\\\\n/g, "\n");
 
         sendMessage(data.groupId, message);
       } catch (error) {
@@ -70,6 +87,12 @@ const generateJob = async (
     }
   );
 };
+
+/**
+ * byte to megabytes
+ * @param {number} n number of size
+ * @returns result in mb
+ */
 const inMb = (n: number) => {
   return (n / 1024 / 1024).toFixed(2) + " MB";
 };
@@ -107,28 +130,33 @@ const memoryUsageJob = () => {
  * creates cron jobs.
  */
 export const createCronJobs = async () => {
-  createKeepAliveJob();
+  try {
+    createKeepAliveJob();
 
-  let all = await dbClient.dayCount
-    .findMany({
-      select: {
-        id: true,
-        groupId: true,
-        schedule: true,
-      },
-    })
-    .then((dayCounts) => {
-      return dayCounts.filter((dayCount) =>
-        validateCron(`${dayCount?.schedule}`)
-      );
+    let all = await dbClient.dayCount
+      .findMany({
+        select: {
+          id: true,
+          groupId: true,
+          schedule: true,
+        },
+      })
+      .then((dayCounts) => {
+        return dayCounts.filter((dayCount) =>
+          validateCron(`${dayCount?.schedule}`)
+        );
+      });
+
+    all.forEach(async (dc) => {
+      await generateJob(dc.schedule, dc.id, dc.groupId);
     });
 
-  all.forEach(async (dc) => {
-    await generateJob(dc.schedule, dc.id, dc.groupId);
-  });
-  console.log(
-    `[INFO]: ${Object.keys(scheduler.scheduledJobs).length} jobs created.`
-  );
+    console.log(
+      `[INFO]: ${Object.keys(scheduler.scheduledJobs).length} jobs created.`
+    );
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 /**

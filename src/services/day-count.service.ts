@@ -48,7 +48,7 @@ export const createDayCount = async ({
   groupId,
   dayCount = 0,
   schedule = "0 0 * * *",
-  message = "ថ្ងៃទី {day_count}",
+  message = "ថ្ងៃទី $count",
 }: CreateDayCounter) => {
   return await dbClient.dayCount.create({
     data: {

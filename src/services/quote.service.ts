@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { dbClient } from "../libs/index.lib";
 
 /**
@@ -6,6 +7,46 @@ import { dbClient } from "../libs/index.lib";
  */
 export const findAllQuotes = async () => {
   return await dbClient.quote.findMany();
+};
+
+/**
+ * finds one random quote
+ */
+export const findARandomQuote = async () => {
+  // const fields = ["id", "text", "useCount", "createdAt", "updatedAt"];
+  // const orders = ["asc", "desc"];
+  // const payload: Prisma.QuoteOrderByWithRelationInput = {};
+  // const field = fields[
+  //   getRandomInt(fields.length)
+  // ] as Prisma.QuoteScalarFieldEnum;
+  // const order = orders[getRandomInt(orders.length)] as Prisma.SortOrder;
+  // payload[field] = order;
+  return await dbClient.quote.findFirst({
+    orderBy: {
+      useCount: "asc",
+    },
+  });
+};
+
+/**
+ * increases a quote's useCount.
+ */
+export const increaseQuoteUseCount = async (id: number) => {
+  return await dbClient.quote
+    .update({
+      where: { id },
+      data: {
+        useCount: { increment: 1 },
+      },
+    })
+    .catch((e) => {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === "P2025") {
+          throw new Error(`Quote with id ${id} not found.`);
+        }
+      }
+      throw new Error(e);
+    });
 };
 
 /**
@@ -70,4 +111,14 @@ export const deleteQuote = async ({ id, text }: NameOrId) => {
   }
   const payload = id ? { id } : { text };
   return await dbClient.quote.delete({ where: payload });
+};
+
+export const createManyQuotes = async (quotes: string[]) => {
+  if (quotes.length === 0) return quotes;
+
+  const payload = quotes.map((text) => {
+    return { text };
+  });
+
+  return dbClient.quote.createMany({ data: payload });
 };
