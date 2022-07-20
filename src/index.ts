@@ -32,6 +32,7 @@ import {
   startCommand,
   helpCommand,
   checkCommand,
+  createManyQuotesCommand,
 } from "./commands/index.command";
 import {
   formatMiddleware,
@@ -100,6 +101,7 @@ bot.command(COMMANDS.ADMIN_DELETE, deleteAdminCommand);
 
 //#region Quote
 bot.command(COMMANDS.QUOTE_NEW, createQuoteCommand);
+bot.command(COMMANDS.MANY_QUOTES_NEW, createManyQuotesCommand);
 bot.command(COMMANDS.QUOTE_LIST, sendQuoteListCommand);
 bot.command(COMMANDS.QUOTE_DELETE, deleteQuoteCommand);
 //#endregion
@@ -119,7 +121,7 @@ bot.action(/\bcancel\b/g, cancelAction);
 bot.command(COMMANDS.EMIT, emitBroadcastCommand);
 bot.action(/\bemit\b/g, emitBroadcastAction);
 //#endregion
-// TODO: copy changes from the old folder
+
 bot.telegram.setWebhook(`${SERVER_URL}/bot${BOT_TOKEN}`);
 const app = express();
 app.use(bodyParser.json());
@@ -130,8 +132,6 @@ export const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 app.get("/", (_: Request, res: Response) => {
   return res.json({ alive: true, uptime: process.uptime() });
 });
-
-// can it push
 
 const server = app.listen(process.env.PORT || 3000, async () => {
   console.log(`[INFO]: App running on port ${process.env.PORT || 3000}`);
