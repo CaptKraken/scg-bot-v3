@@ -1,3 +1,4 @@
+import { Quote } from "@prisma/client";
 import { MyContext } from "../index";
 import {
   dbClient,
@@ -5,7 +6,12 @@ import {
   errorHandler,
   sendDisappearingMessage,
 } from "../libs/index.lib";
-import { createQuote, deleteQuote } from "../services/index.service";
+import {
+  createManyQuotes,
+  createQuote,
+  deleteQuote,
+} from "../services/index.service";
+import { findOneQuote } from "../services/quote.service";
 
 /**
  * creates new quote.
@@ -23,13 +29,50 @@ export const createQuoteCommand = async (ctx: MyContext) => {
 };
 
 /**
+ * creates many quotes.
+ */
+export const createManyQuotesCommand = async (ctx: MyContext) => {
+  try {
+    if (!ctx.cleanedMessage?.trim()) return;
+    const quotes = ctx.cleanedMessage.split("\n").filter((quote) => quote);
+    await createManyQuotes(quotes);
+    await sendDisappearingMessage(
+      ctx.chatId,
+      `[Success]: ${quotes.length} quotes added.`
+    );
+  } catch (error) {
+    errorHandler(ctx.chatId, error);
+  }
+};
+
+/**
  * Sends all quotes.
  */
 export const sendQuoteListCommand = async (ctx: MyContext) => {
-  const quotes = await dbClient.quote.findMany({
-    orderBy: { id: "asc" },
-    select: { id: true, text: true },
-  });
+  const id = Number(ctx.cleanedMessage);
+  let quotes: {
+    text: string;
+    id: number;
+  }[] = [];
+  if (id === NaN) {
+    quotes = await dbClient.quote.findMany({
+      orderBy: { id: "asc" },
+      select: { id: true, text: true },
+    });
+  } else {
+    quotes = await findOneQuote(id)
+      .then((quote) => {
+        return [
+          {
+            id: quote.id,
+            text: quote.text,
+          },
+        ];
+      })
+      .catch((e) => {
+        return [];
+      });
+  }
   let csv = "ID\tQuote";
   quotes.map((quote) => {
     csv += "\n" + quote.id + "\t" + quote.text;
@@ -56,7 +99,7 @@ export const deleteQuoteCommand = async (ctx: MyContext) => {
     await deleteQuote(payload);
     await sendDisappearingMessage(
       ctx.chatId,
-      `[Success]: Quote ${payload} removed.`
+      `[Success]: Quote "${payload.text}" removed.`
     );
   } catch (error) {
     errorHandler(ctx.chatId, error);

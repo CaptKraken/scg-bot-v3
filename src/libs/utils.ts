@@ -381,3 +381,7 @@ export const validateCron = (expression: string) => {
   const hasSeconds = expression.split(" ").length === 6;
   return isValidCron(expression, { seconds: hasSeconds });
 };
+
+export const getRandomInt = (max: number) => {
+  return Math.floor(Math.random() * max);
+};

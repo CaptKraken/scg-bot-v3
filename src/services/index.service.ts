@@ -1,6 +1,12 @@
 export { createCronJobs, restartAllJobs } from "./schedule.service";
 export { createGroup } from "./group.service";
-export { createQuote, deleteQuote } from "./quote.service";
+export {
+  createQuote,
+  createManyQuotes,
+  deleteQuote,
+  findARandomQuote,
+  increaseQuoteUseCount,
+} from "./quote.service";
 export {
   findAllAdmins,
   createNewAdmin,

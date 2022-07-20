@@ -38,6 +38,8 @@ export const COMMANDS = {
   // QUOTES //
   /** "newquote" */
   QUOTE_NEW: "newquote",
+  /** "newquotes" */
+  MANY_QUOTES_NEW: "newquotes",
   /** "deletequote" */
   QUOTE_DELETE: "deletequote",
   /** "listquotes" */
@@ -83,8 +85,8 @@ export const miscellaneousCommands = {
 export const dayCountCommands = {
   name: "Day Count",
   commands: [
-    `/${COMMANDS.DC_NEW} -d 1 -s "0 5 * * *" -m "whatever {day_count} you want." — create new day count record for the group.`,
-    `/${COMMANDS.DC_EDIT} -id 1 -d 1 -s "0 5 * * *" -m "whatever {day_count} you want." — update day count record with the given id.`,
+    `/${COMMANDS.DC_NEW} -d 1 -s "0 5 * * *" -m "whatever $count you want." — create new day count record for the group.`,
+    `/${COMMANDS.DC_EDIT} -id 1 -d 1 -s "0 5 * * *" -m "whatever $count you want." — update day count record with the given id.`,
     `/${COMMANDS.DC_CONTROL} {-id 1 | -a | -g} 123? — update day count records with the given amount.`,
     `/${COMMANDS.DC_DELETE} — remove day count.`,
     `/${COMMANDS.DC_LIST} -a? - list all day count records of one or all (with -a flag) groups.`,
@@ -122,6 +124,8 @@ export const quoteCommands = {
   name: "Quotes",
   commands: [
     `/${COMMANDS.QUOTE_NEW} — add a new quote.`,
+    `/${COMMANDS.MANY_QUOTES_NEW} — add many quotes (1 quote per line).`,
+    `/${COMMANDS.QUOTE_LIST} — send quote list.`,
     `/${COMMANDS.QUOTE_DELETE} — remove a quote.`,
   ],
 };
